@@ -1,0 +1,12 @@
+package notif;
+
+public abstract class Etat {
+ protected Notification notification;
+
+public Etat(Notification notification) {
+	super();
+	this.notification = notification;
+}
+ 
+
+}

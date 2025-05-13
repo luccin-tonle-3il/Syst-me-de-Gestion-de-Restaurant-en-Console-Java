@@ -1,0 +1,53 @@
+package model;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public class Commande {
+	private List<MenuItem>items;
+	private int id;
+    private int tableId;
+    private CommandeState etat;
+	public Commande(int tableId) {
+		super();
+		this.items = new ArrayList<>();
+		this.tableId = tableId;
+		this.etat = new NouvelleCommande();
+	}
+	
+	
+	
+	public List<MenuItem> getItems() {
+		return items;
+	}
+
+
+	
+	
+    
+    public CommandeState getEtat() {
+		return etat;
+	}
+
+
+
+	public void setEtat(CommandeState etat) {
+		this.etat = etat;
+	}
+
+
+
+	public void ajouterItem(MenuItem item) {
+    	items.add(item);
+    }
+	
+	public void afficherDetails() {
+        System.out.println("Commande :");
+        for (MenuItem item : items) {
+            item.afficherDetails();
+        }
+        System.out.println("État de la commande : " + etat.getClass().getSimpleName());
+    }
+
+}

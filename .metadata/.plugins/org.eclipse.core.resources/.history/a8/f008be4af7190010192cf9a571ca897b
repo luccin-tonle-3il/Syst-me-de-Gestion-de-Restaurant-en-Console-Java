@@ -1,0 +1,40 @@
+package notif;
+
+public class EtatEnAttente extends Etat {
+
+	public EtatEnAttente(Notification notification) {
+		super(notification);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void operationEtatLu() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void operationEtatEnvoyer() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void operationEtatEnAttente() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void operationEtatEchoue() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void doAction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

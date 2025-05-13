@@ -1,0 +1,32 @@
+package notif;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class User implements Observer {
+    private String name;
+    private List<Notification> channels;
+
+    public User(String name,List<String> canal) {
+        this.name = name;
+        this.channels=new ArrayList<Notification>();
+        for(String c:canal) {
+        	
+        	this.channels.add(NotificationFactory.createNotification(c));
+    
+        }
+       
+    }
+
+    @Override
+    public void update(String message) {
+        for (Notification channel : channels) {
+        	channel.doAction();
+            channel.send("[" + name + "] " + message);
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+}

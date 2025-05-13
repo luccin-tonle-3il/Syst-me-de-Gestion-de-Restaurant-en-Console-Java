@@ -1,0 +1,22 @@
+package dao;
+
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import model.MenuItem;
+import model.Plat;
+
+public class MenuDao {
+	
+	public void insert(MenuItem item) throws SQLException {
+        Connection conn = DBConnection.getInstance();
+        PreparedStatement ps = conn.prepareStatement("INSERT INTO menu_item(name, price, type) VALUES (?, ?, ?)");
+        ps.setString(1, item.getName());
+        ps.setDouble(2, item.getPrice());
+        ps.setString(3, item instanceof Plat? "plat" : "boisson");
+        ps.executeUpdate();
+    }
+	
+}

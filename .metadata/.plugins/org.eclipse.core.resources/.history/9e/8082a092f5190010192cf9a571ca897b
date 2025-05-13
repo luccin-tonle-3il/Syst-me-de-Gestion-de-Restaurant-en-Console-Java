@@ -1,0 +1,36 @@
+package notif;
+
+public class EtatEchouee extends Etat {
+
+	@Override
+	public void operationEtatLu() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void operationEtatEnvoyer() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void operationEtatEnAttente() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void operationEtatEchoue() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void doAction() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+}

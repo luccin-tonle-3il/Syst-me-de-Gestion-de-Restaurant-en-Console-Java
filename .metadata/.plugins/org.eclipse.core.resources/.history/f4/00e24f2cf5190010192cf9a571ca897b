@@ -1,0 +1,30 @@
+package notif;
+
+public abstract class Notification{
+	protected Strategy strategy;
+	private Etat etat;
+	
+	public void appliquerstrategy() {
+		strategy.send();
+	}
+	
+	public void send(String message) {
+        System.out.println("Push envoyé : " + message);
+    }
+
+
+	public void setStrategy(Strategy strategy) {
+		this.strategy = strategy;
+	}
+	
+	public void operationEtatLu() {	etat.operationEtatLu();	}
+	
+	public void operationEtatEnvoyer() { etat.operationEtatEnvoyer();}
+	
+	public  void operationEtatEnAttente() {	etat.operationEtatEnAttente();}
+	
+	public void operationEtatEchoue() {	etat.operationEtatEchoue();}
+	
+	
+	
+}

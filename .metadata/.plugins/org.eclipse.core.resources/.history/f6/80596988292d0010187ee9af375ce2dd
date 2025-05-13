@@ -1,0 +1,8 @@
+package model;
+
+public class Personnel {
+	private String nom;
+	private String sexe;
+	private String numero;
+	
+}

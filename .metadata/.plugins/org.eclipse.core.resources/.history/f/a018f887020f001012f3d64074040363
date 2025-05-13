@@ -1,0 +1,8 @@
+package notification;
+
+public interface Observer {
+	
+ public default void update(String message) {
+	 
+ }
+}

@@ -1,0 +1,18 @@
+package model;
+
+import java.util.Date;
+
+public class Reservation {
+	private int id;
+    private String nomClient;
+    private Date date;
+    private int tableId;
+	public Reservation(String nomClient, Date date, int tableId) {
+		super();
+		this.nomClient = nomClient;
+		this.date = date;
+		this.tableId = tableId;
+	}
+    
+    
+}

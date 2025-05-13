@@ -1,0 +1,11 @@
+package notif;
+
+public class Strategyrapide implements Strategy {
+
+	@Override
+	public void send() {
+		// TODO Auto-generated method stub
+
+	}
+
+}

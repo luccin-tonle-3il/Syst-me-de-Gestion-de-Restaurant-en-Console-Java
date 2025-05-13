@@ -1,0 +1,5 @@
+package service;
+
+public interface Observer {
+	void notifier(String message);
+}

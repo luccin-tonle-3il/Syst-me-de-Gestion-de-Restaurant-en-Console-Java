@@ -1,0 +1,11 @@
+package model;
+
+public class MenuItemFactory {
+	public static MenuItem create(String type, String name, double price) {
+        return switch (type.toLowerCase()) {
+            case "plat" -> new Dish(name, price);
+            case "boisson" -> new Drink(name, price);
+            default -> throw new IllegalArgumentException("Type invalide");
+        };
+    }
+}

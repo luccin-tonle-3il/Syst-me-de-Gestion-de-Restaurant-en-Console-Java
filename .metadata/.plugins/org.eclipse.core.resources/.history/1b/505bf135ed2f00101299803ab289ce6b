@@ -1,0 +1,6 @@
+package manger;
+
+public class Main {
+	RestaurantManager manager = new RestaurantManager();
+    manager.afficherMenuConsole();
+}

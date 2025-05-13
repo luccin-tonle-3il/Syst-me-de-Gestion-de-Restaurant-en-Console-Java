@@ -1,0 +1,9 @@
+package notif;
+
+public class EmailNotification extends Notification {
+
+	public void send(String message) {
+        System.out.println("Email envoyé : " + message);
+    }
+
+}

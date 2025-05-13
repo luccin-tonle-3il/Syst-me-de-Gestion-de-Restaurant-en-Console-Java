@@ -1,0 +1,14 @@
+package notif;
+
+public class SMSNotification extends Notification {
+
+	 public void send(String message) {
+	        System.out.println("SMS envoyé : " + message);
+	    }
+
+	@Override
+	public void send() {
+		// TODO Auto-generated method stub
+		
+	}
+}

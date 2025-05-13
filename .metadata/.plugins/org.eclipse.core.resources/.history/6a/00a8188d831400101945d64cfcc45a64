@@ -1,0 +1,11 @@
+package notif;
+
+public abstract class Notification implements Strategy {
+	protected Strategy strategy;
+	private Etat etat;
+	
+	public void appliquerstrategy() {
+		
+	}
+	
+}

@@ -1,0 +1,10 @@
+package notif;
+
+public class EtatEnvoyer extends Etat {
+
+	public EtatEnvoyer(Notification notification) {
+		super(notification);
+		// TODO Auto-generated constructor stub
+	}
+
+}

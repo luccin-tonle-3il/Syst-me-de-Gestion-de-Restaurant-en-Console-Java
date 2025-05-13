@@ -1,0 +1,50 @@
+package notif;
+
+public class EtatEchouee extends Etat {
+
+	public EtatEchouee(Notification notification) {
+		super(notification);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void operationEtatLu() {
+		// TODO Auto-generated method stub
+		notification.setEtat(new EtatLu(notification));
+		System.out.println ("imposssible");
+
+	}
+
+	@Override
+	public void operationEtatEnvoyer() {
+		// TODO Auto-generated method stub
+		notification.setEtat(new EtatEnvoyer(notification));
+		System.out.println ("Méssage maintenant envoyé");
+		
+	}
+
+	@Override
+	public void operationEtatEnAttente() {
+		// TODO Auto-generated method stub
+		notification.setEtat(new EtatLu(notification));
+		System.out.println ("Méssage en attente");
+		
+	}
+
+	@Override
+	public void operationEtatEchoue() {
+		// TODO Auto-generated method stub
+		System.out.println ("Envoie encore échoué ");
+
+		
+	}
+
+	@Override
+	public void doAction() {
+		// TODO Auto-generated method stub
+		System.out.println("Etat Echouee");
+		
+	}
+
+
+}

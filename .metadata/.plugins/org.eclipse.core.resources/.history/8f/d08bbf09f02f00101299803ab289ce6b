@@ -1,0 +1,10 @@
+package service;
+
+public class CreditCarte extends PayementStartegy {
+
+	public void pay(double amount) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

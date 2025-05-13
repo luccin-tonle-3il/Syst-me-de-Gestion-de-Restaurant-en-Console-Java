@@ -1,0 +1,21 @@
+package dao;
+import Reservation;
+public class ReservationDao {
+	private List<Reservation> reservations;
+
+    public ReservationDao() {
+        reservations = new ArrayList<>();
+    }
+
+    public void ajouter(Reservation reservation) {
+        reservations.add(reservation);
+    }
+
+    public Reservation getReservation(int id) {
+        return reservations.stream().filter(r -> r.getId() == id).findFirst().orElse(null);
+    }
+
+    public List<Reservation> lister() {
+        return new ArrayList<>(reservations);
+    }
+}

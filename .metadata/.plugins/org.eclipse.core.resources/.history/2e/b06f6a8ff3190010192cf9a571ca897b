@@ -1,0 +1,5 @@
+package notif;
+
+public class EtatEnvoyer extends Etat {
+
+}
