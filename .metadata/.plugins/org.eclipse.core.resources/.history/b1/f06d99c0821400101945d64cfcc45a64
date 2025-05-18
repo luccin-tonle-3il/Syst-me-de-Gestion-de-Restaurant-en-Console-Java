@@ -1,5 +1,0 @@
-package notif;
-
-public abstract class Notification {
-	abstract void send(String message);
-}

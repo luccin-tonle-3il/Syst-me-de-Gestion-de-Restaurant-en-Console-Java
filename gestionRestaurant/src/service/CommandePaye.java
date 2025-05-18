@@ -2,10 +2,9 @@ package service;
 
 import model.Commande;
 
+public class CommandePaye extends CommandeState {
 
-public class NouvelleCommande extends CommandeState {
-
-	public NouvelleCommande(Commande commade) {
+	public CommandePaye(Commande commade) {
 		super(commade);
 		// TODO Auto-generated constructor stub
 	}
@@ -13,20 +12,21 @@ public class NouvelleCommande extends CommandeState {
 	@Override
 	public void operationPaye() {
 		// TODO Auto-generated method stub
-		System.out.println ("Deja paye");
+		System.out.println ("Payement effectue");
 	}
 
 	@Override
 	public void operationNouvelle() {
 		// TODO Auto-generated method stub
-		System.out.println ("Nouvelle Commande");
+			commade.setEtat(new NouvelleCommande(commade));
+			System.out.println ("Méssage en attente");
+			
 	}
 
 	@Override
 	public void operationEnCours() {
 		// TODO Auto-generated method stub
-			commade.setEtat(new CommandeEnCours(commade));
-			System.out.println ("Méssage en attente");
+		System.out.println ("impossible");
 	}
 
 	@Override
@@ -44,9 +44,8 @@ public class NouvelleCommande extends CommandeState {
 	@Override
 	public void doAction() {
 		// TODO Auto-generated method stub
-		System.out.println ("Nouvelle Commande");
+		System.out.println ("Commande Payee");
+
 	}
-	
-	
 
 }

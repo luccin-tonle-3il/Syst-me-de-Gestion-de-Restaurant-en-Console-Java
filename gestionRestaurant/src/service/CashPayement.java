@@ -3,9 +3,9 @@ package service;
 public class CashPayement implements PayementStartegy {
 
 	@Override
-	public void pay(double amount) {
+	public void pay() {
 		// TODO Auto-generated method stub
-		System.out.println("Paiement par carte");
+		System.out.println("Paiement en espèce");
 	}
 
 }

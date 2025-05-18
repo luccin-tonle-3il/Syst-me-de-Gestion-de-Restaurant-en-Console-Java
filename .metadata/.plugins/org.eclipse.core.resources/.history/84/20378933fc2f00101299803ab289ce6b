@@ -1,7 +1,0 @@
-package model;
-
-import model.CommandeState;
-
-public class NouvelleCommande extends CommandeState {
-
-}

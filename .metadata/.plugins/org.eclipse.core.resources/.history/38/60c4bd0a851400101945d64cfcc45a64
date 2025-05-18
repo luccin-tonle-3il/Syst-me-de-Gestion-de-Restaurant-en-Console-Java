@@ -1,6 +1,0 @@
-package notif;
-
-public interface Strategy {
-	public void send();
-
-}

@@ -1,6 +1,0 @@
-package notif;
-
-public abstract class Etat {
- protected Notification notification;
- 
-}

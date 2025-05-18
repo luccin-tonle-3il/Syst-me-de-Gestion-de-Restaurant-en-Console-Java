@@ -13,7 +13,7 @@ public class DBConnection {
 	                // Remplacez les paramètres suivants par vos propres informations de connexion à la base de données
 	                String url = "jdbc:mysql://localhost:3306/gestionrestaurant";
 	                String username = "root";
-	                String password = "password";
+	                String password = "";
 
 	                connection = DriverManager.getConnection(url, username, password);
 	            } catch (SQLException e) {

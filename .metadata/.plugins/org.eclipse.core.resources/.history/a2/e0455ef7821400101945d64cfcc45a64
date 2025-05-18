@@ -1,8 +1,0 @@
-package notif;
-
-public class SMSNotification extends Notification {
-
-	 public void send(String message) {
-	        System.out.println("SMS envoyé : " + message);
-	    }
-}

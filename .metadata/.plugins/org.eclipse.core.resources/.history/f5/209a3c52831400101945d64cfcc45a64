@@ -1,6 +1,0 @@
-package notif;
-
-public abstract class Notification implements Strategy {
-	abstract void send(String message);
-	
-}

@@ -1,7 +1,0 @@
-package dao;
-
-import model.CommandeState;
-
-public class CommandeLivree extends CommandeState {
-
-}

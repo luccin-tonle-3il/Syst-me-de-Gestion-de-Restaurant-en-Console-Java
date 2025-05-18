@@ -1,5 +1,0 @@
-package notif;
-
-public interface Notification {
-	void send(String message);
-}

@@ -1,5 +1,0 @@
-package notification;
-
-public class User implements Observer {
-	private String name;
-}

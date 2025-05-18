@@ -1,4 +1,4 @@
-!SESSION 2025-04-01 14:24:22.471 -----------------------------------------------
+!SESSION 2025-05-13 18:24:42.032 -----------------------------------------------
 eclipse.buildId=4.32.0.20240606-1231
 java.version=22.0.2
 java.vendor=Oracle Corporation
@@ -6,19 +6,19 @@ BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
 Framework arguments:  -product org.eclipse.epp.package.java.product
 Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.java.product
 
-!ENTRY ch.qos.logback.classic 1 0 2025-04-01 14:24:28.160
+!ENTRY ch.qos.logback.classic 1 0 2025-05-13 18:24:45.891
 !MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
 
-!ENTRY ch.qos.logback.classic 1 0 2025-04-01 14:26:29.974
-!MESSAGE Logback config file: C:\Users\LENOVO\Documents\Projet pro\.metadata\.plugins\org.eclipse.m2e.logback\logback.2.6.1.20240411-1122.xml
+!ENTRY ch.qos.logback.classic 1 0 2025-05-13 18:25:48.579
+!MESSAGE Logback config file: C:\Users\LENOVO\Documents\Projet_pro_java\Gestion_restaurant\.metadata\.plugins\org.eclipse.m2e.logback\logback.2.6.1.20240411-1122.xml
 
-!ENTRY org.eclipse.egit.ui 2 0 2025-04-01 14:26:42.585
+!ENTRY org.eclipse.egit.ui 2 0 2025-05-13 18:25:54.872
 !MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
 user global configuration and to define the default location to store repositories: 'C:\Users\LENOVO'. If this is
 not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
 EGit might behave differently since they see different configuration options.
 This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
-!SESSION 2025-04-08 12:15:35.537 -----------------------------------------------
+!SESSION 2025-05-17 19:57:50.176 -----------------------------------------------
 eclipse.buildId=4.32.0.20240606-1231
 java.version=22.0.2
 java.vendor=Oracle Corporation
@@ -26,85 +26,16 @@ BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
 Framework arguments:  -product org.eclipse.epp.package.java.product
 Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.java.product
 
-!ENTRY ch.qos.logback.classic 1 0 2025-04-08 12:15:39.559
+!ENTRY ch.qos.logback.classic 1 0 2025-05-17 19:57:52.940
 !MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
 
-!ENTRY org.eclipse.core.resources 2 10035 2025-04-08 12:17:24.619
+!ENTRY org.eclipse.core.resources 2 10035 2025-05-17 19:57:56.917
 !MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
 
-!ENTRY ch.qos.logback.classic 1 0 2025-04-08 12:17:25.568
-!MESSAGE Logback config file: C:\Users\LENOVO\Documents\Projet pro\.metadata\.plugins\org.eclipse.m2e.logback\logback.2.6.1.20240411-1122.xml
+!ENTRY ch.qos.logback.classic 1 0 2025-05-17 19:57:57.982
+!MESSAGE Logback config file: C:\Users\LENOVO\Documents\Projet_pro_java\Gestion_restaurant\.metadata\.plugins\org.eclipse.m2e.logback\logback.2.6.1.20240411-1122.xml
 
-!ENTRY org.eclipse.egit.ui 2 0 2025-04-08 12:17:31.706
-!MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
-user global configuration and to define the default location to store repositories: 'C:\Users\LENOVO'. If this is
-not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
-EGit might behave differently since they see different configuration options.
-This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
-!SESSION 2025-04-15 11:57:09.102 -----------------------------------------------
-eclipse.buildId=4.32.0.20240606-1231
-java.version=22.0.2
-java.vendor=Oracle Corporation
-BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
-Framework arguments:  -product org.eclipse.epp.package.java.product
-Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.java.product
-
-!ENTRY ch.qos.logback.classic 1 0 2025-04-15 11:57:14.530
-!MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
-
-!ENTRY org.eclipse.core.resources 2 10035 2025-04-15 11:59:33.600
-!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
-
-!ENTRY ch.qos.logback.classic 1 0 2025-04-15 11:59:34.483
-!MESSAGE Logback config file: C:\Users\LENOVO\Documents\Projet pro\.metadata\.plugins\org.eclipse.m2e.logback\logback.2.6.1.20240411-1122.xml
-
-!ENTRY org.eclipse.egit.ui 2 0 2025-04-15 11:59:41.784
-!MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
-user global configuration and to define the default location to store repositories: 'C:\Users\LENOVO'. If this is
-not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
-EGit might behave differently since they see different configuration options.
-This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
-!SESSION 2025-05-06 13:30:39.390 -----------------------------------------------
-eclipse.buildId=4.32.0.20240606-1231
-java.version=22.0.2
-java.vendor=Oracle Corporation
-BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
-Framework arguments:  -product org.eclipse.epp.package.java.product
-Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.java.product
-
-!ENTRY ch.qos.logback.classic 1 0 2025-05-06 13:30:43.393
-!MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
-
-!ENTRY org.eclipse.core.resources 2 10035 2025-05-06 13:30:56.783
-!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
-
-!ENTRY ch.qos.logback.classic 1 0 2025-05-06 13:30:57.762
-!MESSAGE Logback config file: C:\Users\LENOVO\Documents\Projet pro\.metadata\.plugins\org.eclipse.m2e.logback\logback.2.6.1.20240411-1122.xml
-
-!ENTRY org.eclipse.egit.ui 2 0 2025-05-06 13:31:03.362
-!MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
-user global configuration and to define the default location to store repositories: 'C:\Users\LENOVO'. If this is
-not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
-EGit might behave differently since they see different configuration options.
-This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
-!SESSION 2025-05-12 23:26:07.191 -----------------------------------------------
-eclipse.buildId=4.32.0.20240606-1231
-java.version=22.0.2
-java.vendor=Oracle Corporation
-BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=fr_FR
-Framework arguments:  -product org.eclipse.epp.package.java.product
-Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.java.product
-
-!ENTRY ch.qos.logback.classic 1 0 2025-05-12 23:26:11.380
-!MESSAGE Activated before the state location was initialized. Retry after the state location is initialized.
-
-!ENTRY org.eclipse.core.resources 2 10035 2025-05-12 23:26:21.789
-!MESSAGE The workspace exited with unsaved changes in the previous session; refreshing workspace to recover changes.
-
-!ENTRY ch.qos.logback.classic 1 0 2025-05-12 23:26:22.814
-!MESSAGE Logback config file: C:\Users\LENOVO\Documents\Projet pro\.metadata\.plugins\org.eclipse.m2e.logback\logback.2.6.1.20240411-1122.xml
-
-!ENTRY org.eclipse.egit.ui 2 0 2025-05-12 23:26:28.410
+!ENTRY org.eclipse.egit.ui 2 0 2025-05-17 19:58:04.303
 !MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
 user global configuration and to define the default location to store repositories: 'C:\Users\LENOVO'. If this is
 not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
