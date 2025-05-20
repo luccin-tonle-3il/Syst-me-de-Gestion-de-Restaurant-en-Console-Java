@@ -1,11 +1,16 @@
 package model;
 
 public class Plat extends MenuItem {
+	private Ingredient ingredients;
 
-	public Plat(String name, double price) {
+	
+
+	public Plat(String name, double price, Ingredient ingredients) {
 		super(name, price);
-		// TODO Auto-generated constructor stub
+		this.ingredients = ingredients;
 	}
+
+
 
 	@Override
 	public void afficherDetails() {

@@ -61,7 +61,7 @@ public class CommandeDao {
                 int id = rs.getInt("id");
                 String etat = rs.getString("etat");
                 List<MenuItem> items = getItemsForCommande(id);
-                Commande commande = new Commande(items);
+                Commande commande = new Commande();
                 commande.setEtat(createEtat(etat));
                 commandes.add(commande);
             }
@@ -104,9 +104,9 @@ public class CommandeDao {
     private CommandeState createEtat(String etat) {
         switch (etat) {
             case "NouvelleCommande":
-                return new NouvelleCommande();
+                return new NouvelleCommande(null);
             case "EnCours":
-                return new CommandeEnCours();
+                return new CommandeEnCours(null);
             case "CommandeLivree":
                 return new CommandeLivree();
             default:

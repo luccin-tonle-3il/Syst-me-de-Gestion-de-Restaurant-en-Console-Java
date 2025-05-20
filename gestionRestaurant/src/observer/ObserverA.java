@@ -1,5 +1,5 @@
 package observer;
 
-public interface Observer {
+public interface ObserverA {
 	String notifier(String message);
 }

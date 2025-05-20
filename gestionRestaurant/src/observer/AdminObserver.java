@@ -1,6 +1,6 @@
 package observer;
 
-public class AdminObserver implements Observer{
+public class AdminObserver implements ObserverA{
 
 	@Override
 	public String notifier(String message) {

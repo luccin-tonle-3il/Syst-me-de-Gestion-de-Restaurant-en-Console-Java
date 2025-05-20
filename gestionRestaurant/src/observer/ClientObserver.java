@@ -1,6 +1,6 @@
 package observer;
 
-public class ClientObserver implements Observer{
+public class ClientObserver implements ObserverC{
 
 	@Override
 	public String notifier(String message) {

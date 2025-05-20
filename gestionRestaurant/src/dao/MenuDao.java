@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Boisson;
+import model.Ingredient;
 import model.MenuItem;
 import model.Plat;
 
@@ -53,10 +54,11 @@ public class MenuDao {
                 String nom = rs.getString("nom");
                 double prix = rs.getDouble("prix");
                 String type = rs.getString("type");
+                Ingredient ingredient = rs.getIngredient("ingredient");
 
                 MenuItem item;
                 if ("plat".equals(type)) {
-                    item = new Plat(nom, prix); // Ajoute des infos de description si nécessaire
+                    item = new Plat(nom, prix, ingredient); 
                 } else {
                     item = new Boisson(nom, prix); // Par défaut non alcoolisé, mais peut être modifié
                 }
