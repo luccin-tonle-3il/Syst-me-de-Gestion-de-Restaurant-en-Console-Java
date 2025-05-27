@@ -1,11 +1,13 @@
 package service;
 
 import model.Commande;
+import model.MenuItem;
 
 
 public abstract class CommandeState {
 
 	protected Commande commade;
+	private MenuItem menu;
 	
 	
 	public CommandeState(Commande commade) {

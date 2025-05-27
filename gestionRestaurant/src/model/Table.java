@@ -4,11 +4,15 @@ public class Table {
 	private int id;
 	private boolean estOccupee;
 	private Commande commande;
+	private int numero;
+	private int capacite;
 
 	public Table(int numero, String statut) {
 		super();
 		this.id = id;
 		this.estOccupee = false;
+		this.numero = numero;
+		this.capacite = capacite;
 	}
 
 	public int getId() {
@@ -38,6 +42,16 @@ public class Table {
 	  public void afficherStatut() {
 	        System.out.println("Table " + id + " - Statut: " + (estOccupee ? "Occupée" : "Disponible"));
 	    }
+
+	public int getNumero() {
+		// TODO Auto-generated method stub
+		return this.numero;
+	}
+
+	public int getCapacite() {
+		// TODO Auto-generated method stub
+		return this.capacite;
+	}
 
 
 

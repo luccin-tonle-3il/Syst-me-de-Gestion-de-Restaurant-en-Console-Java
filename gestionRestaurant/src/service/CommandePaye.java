@@ -1,9 +1,10 @@
 package service;
 
 import model.Commande;
+import model.MenuItem;
 
 public class CommandePaye extends CommandeState {
-
+	private MenuItem menu;
 	public CommandePaye(Commande commade) {
 		super(commade);
 		// TODO Auto-generated constructor stub
@@ -12,7 +13,8 @@ public class CommandePaye extends CommandeState {
 	@Override
 	public void operationPaye() {
 		// TODO Auto-generated method stub
-		System.out.println ("Payement effectue");
+		
+		System.out.println ("Payement effectue à :"+ menu.getPrice());
 	}
 
 	@Override
@@ -44,7 +46,7 @@ public class CommandePaye extends CommandeState {
 	@Override
 	public void doAction() {
 		// TODO Auto-generated method stub
-		System.out.println ("Commande Payee");
+		System.out.println ("Commande Payee à : "+ menu.getPrice());
 
 	}
 

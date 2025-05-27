@@ -1,5 +1,4 @@
-/observer/
-/service/
-/dao/
-/model/
 /manger/
+/service/
+/model/
+/dao/

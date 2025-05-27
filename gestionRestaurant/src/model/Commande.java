@@ -13,10 +13,42 @@ public class Commande {
 	private List<MenuItem>items;
 	private int commandeId;
 	private int tableId;
+	private Date datecom;
 	private CommandeState etat;
 	protected PayementStartegy strategy;
+	private MenuItem menu;
 	
 	
+	
+	public Date getDatecom() {
+		return datecom;
+	}
+
+
+	public void seatDatecom(Date datecom) {
+		this.datecom = datecom;
+	}
+
+
+	public int getTableId() {
+		return tableId;
+	}
+	
+	
+	public int getCommandeId() {
+		return commandeId;
+	}
+
+
+	public void setCommandeId(int commandeId) {
+		this.commandeId = commandeId;
+	}
+
+
+	public void setTableId(int tableId) {
+		this.tableId = tableId;
+	}
+
 	public void appliquerstrategy() {
 		strategy.pay();
 	}
@@ -66,6 +98,8 @@ public class Commande {
 	public  void operationPret() {etat.operationPret();}
 	
 	public void doAction() {etat.doAction();}
+
+	
 	
 
 }
