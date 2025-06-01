@@ -3,24 +3,7 @@ package service;
 import model.Commande;
 
 public class CommandeLivree extends EtatCommande {
-
-	 @Override
-	    public void suivant(Commande commande) {
-	        commande.setEtat(new CommandePayee());
-	        System.out.println("Commande payée.");
-	    }
-
-	    @Override
-	    public void annuler(Commande commande) {
-	        System.out.println("Commande livrée ne peut être annulée.");
-	    }
-
-	    @Override
-	    public String getEtat() {
-	        return "Livrée";
-	    }
-
-	    @Override
+	  @Override
 	    public void operationPaye(Commande commande) {
 	        suivant(commande);
 	    }
@@ -49,5 +32,24 @@ public class CommandeLivree extends EtatCommande {
 	    public void doAction(Commande commande) {
 	        System.out.println("Commande livrée au client.");
 	    }
+	    
+	    @Override
+	    public String getEtat() {
+	        return "Livrée";
+	    }
+
+	 @Override
+	    public void suivant(Commande commande) {
+	        commande.setEtat(new CommandePayee());
+	        System.out.println("Commande payée.");
+	    }
+
+	    @Override
+	    public void annuler(Commande commande) {
+	        System.out.println("Commande livrée ne peut être annulée.");
+	    }
+
+	  
+	  
 
 }

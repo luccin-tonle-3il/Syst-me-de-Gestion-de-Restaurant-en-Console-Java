@@ -27,7 +27,11 @@ public class Reservation {
         this(0, tableId, nomClient, dateReservation, heureReservation, statut);
     }
 
-    // 🔁 Getters & Setters
+    public Reservation() {
+		// TODO Auto-generated constructor stub
+	}
+
+	// 🔁 Getters & Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

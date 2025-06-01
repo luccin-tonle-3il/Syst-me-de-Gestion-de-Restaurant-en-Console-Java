@@ -110,4 +110,37 @@ public class ReservationDao {
 
         return new Reservation(id, tableId, nomClient, dateReservation, heureReservation, statut);
     }
+    
+    public Reservation getReservationById1(int id) throws SQLException {
+        String sql = "SELECT * FROM reservation WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Reservation res = new Reservation();
+                res.setId(rs.getInt("id"));
+                res.setTableId(rs.getInt("table_id"));
+                res.setNomClient(rs.getString("nom_client"));
+                // Conversion de java.sql.Date en java.time.LocalDate
+                Date sqlDate = rs.getDate("date_reservation");
+                if (sqlDate != null) {
+                    res.setDateReservation(sqlDate.toLocalDate());
+                }
+                // Conversion de java.sql.Time en java.time.LocalTime
+                Time sqlTime = rs.getTime("heure_reservation");
+                if (sqlTime != null) {
+                    res.setHeureReservation(sqlTime.toLocalTime());
+                }
+                // Pour le statut, suppose que c'est un enum avec une colonne texte
+                String statutStr = rs.getString("statut");
+                if (statutStr != null) {
+                    res.setStatut(StatutReservation.valueOf(statutStr.toUpperCase()));
+                }
+                return res;
+            } else {
+                return null; // Pas trouvé
+            }
+        }
+    }
+
 }

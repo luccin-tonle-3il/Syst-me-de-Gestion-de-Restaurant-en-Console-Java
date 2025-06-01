@@ -11,12 +11,12 @@ import service.NouvelleCommande;
 import service.PayementStrategy;
 
 public class Commande {
-	private int commandeId;
+    private int commandeId;
     private int tableId;
     private Date datecom;
 
-
-    private List<MenuItem> items = new ArrayList<>();
+    // 🆕 On utilise CommandeItem au lieu de MenuItem pour gérer les quantités
+    private List<CommandeItem> items = new ArrayList<>();
 
     // Patron State
     private EtatCommande etat;
@@ -55,7 +55,7 @@ public class Commande {
         this.datecom = datecom;
     }
 
-    public List<MenuItem> getItems() {
+    public List<CommandeItem> getItems() {
         return items;
     }
 
@@ -63,28 +63,28 @@ public class Commande {
         return etat;
     }
 
-    public void setEtat(EtatCommande commandePrete) {
-        this.etat = commandePrete;
+    public void setEtat(EtatCommande etat) {
+        this.etat = etat;
     }
 
     public void setPayementStrategy(PayementStrategy strategy) {
         this.strategy = strategy;
     }
 
-    // === Méthodes de gestion des items ===
-    public void ajouterItem(MenuItem item) {
+    // === 🔁 Gestion des items avec quantité ===
+    public void ajouterItem(CommandeItem item) {
         items.add(item);
     }
 
     public void afficherDetails() {
         System.out.println("Commande #" + commandeId);
-        for (MenuItem item : items) {
-            item.afficherDetails();
+        for (CommandeItem item : items) {
+            System.out.println("- " + item.getItem().getName() + " x" + item.getQuantite());
         }
         System.out.println("État : " + etat.getEtat());
     }
 
-    // === Gestion de l'état (State) ===
+    // === 📦 Gestion des états (State Pattern) ===
     public void suivantEtat() {
         etat.suivant(this);
     }
@@ -117,7 +117,7 @@ public class Commande {
         etat.doAction(this);
     }
 
-    // === Paiement (Strategy) ===
+    // === 💳 Paiement (Strategy Pattern) ===
     public void payerCommande(double montant) throws SQLException {
         if (strategy != null) {
             strategy.payer(commandeId, montant);

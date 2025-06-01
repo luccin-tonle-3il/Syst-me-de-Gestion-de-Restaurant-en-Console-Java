@@ -5,10 +5,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import dao.CommandeDao;
 import dao.DBConnection;
@@ -17,506 +21,747 @@ import dao.ReservationDao;
 import dao.TableDao;
 import model.Boisson;
 import model.Commande;
+import model.CommandeItem;
 import model.MenuItem;
 import model.Plat;
 import model.Reservation;
-import observer.ClientObserver;
+import model.StatutReservation;
+import model.TableRestaurant;
+import service.EtatCommande;
+import service.NouvelleCommande;
 import service.PayementCarte;
 import service.PayementEspeces;
 import service.PayementStrategy;
 import service.PaymentContext;
 
-
-
 public class ClientInterface extends ConsoleInterface {
-	private ClientObserver observer;
-	private CommandeDao commandeDao;
-	private MenuDao menuDao;
-	private ReservationDao reservationDao;
-	private TableDao tableDao;
-	private Scanner scanner;
-	private SimpleDateFormat dateFormat;
-	private List<Reservation> reservations ;
+    private CommandeDao commandeDao;
+    private MenuDao menuDao;
+    private ReservationDao reservationDao;
+    private TableDao tableDao;
+    private Scanner scanner;
+    private SimpleDateFormat dateFormat;
+    
+    // État du processus client
+    private boolean menuConsulte = false;
+    private boolean commandeCreee = false;
+    private boolean commandeValidee = false;
+    private boolean commandePayee = false;
+    private boolean commandePrete = false;
+    private boolean commandeRecuperee = false;
+    private Commande commandeActuelle = null;
+    private int prochainIdCommande = 1;
+    
+    // Timer pour la notification de commande prête
+    private Timer timerCommande;
+    private boolean notificationAffichee = false;
 
-
-	public ClientInterface() throws SQLException {
-		this.commandeDao = new CommandeDao();
-		this.menuDao = new MenuDao();
-		this.reservationDao = new ReservationDao();
-		this.tableDao = new TableDao();
-		this.scanner = new Scanner(System.in);
-		this.dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-		this.reservations = new ArrayList<>();
-	}
-
-	public void setObserver(ClientObserver observer) {
-		this.observer = observer;
-	}
-
-	// ===============================
-	// INTERFACE UTILISATEUR PRINCIPALE
-	// ===============================
-
-	
-
-	public void demarrerInterface() {
-		System.out.println("===*********************** BIENVENUE PASSER UN BON MOMENT ********************************===");
-		System.out.println("\n=== MENU PRINCIPAL ===");
-		System.out.println("1. Consulter le menu");
-		System.out.println("2. Gérer mes commandes");
-		System.out.println("3. Gérer mes réservations");
-		System.out.println("4. Consulter les tables disponibles");
-		System.out.println("5. Effectuer un paiement");
-		System.out.println("6. Aide");
-		System.out.println("7. Quitter");
-		System.out.print("Votre choix (1-7): ");
-	}
-	
-	public void processChoice(int choix) throws SQLException {
-			switch (choix) {
-			case 1:
-				gererConsultationMenuUI();
-				break;
-			case 2:
-				gererCommandesUI();
-				break;
-			case 3:
-				gererReservationsUI();
-				break;
-			case 4:
-				consulterTablesUI();
-				break;
-			case 5:
-				effectuerPaiementUI();
-				break;
-			case 6:
-				afficherAide();
-				break;
-			case 7:
-				System.out.println("Au revoir et merci de votre visite !");
-				close();
-				break;
-			 default:
-	                printError("Option invalide");
-			}
-		}
-	
-
-	private void gererConsultationMenuUI() throws SQLException {
-	    boolean retour = true;
-	    while (retour) {
-	        System.out.println("\n=== CONSULTATION DU MENU ===");
-	        System.out.println("1. Voir les plats");
-	        System.out.println("2. Voir les boissons");
-	        System.out.println("3. Retour au menu principal");
-	        System.out.print("Votre choix (1-3): ");
-
-	        int choix = lireChoixNumerique(1, 3); // méthode perso supposée existante
-
-	        switch (choix) {
-	            case 1:
-	                List<Plat> plats = menuDao.getAllPlats();
-	                System.out.println("\n--- 🍽️ Liste des Plats ---");
-	                for (Plat p : plats) {
-	                    System.out.println(p);
-	                }
-	                break;
-
-	            case 2:
-	                List<Boisson> boissons = menuDao.getAllBoissons();
-	                System.out.println("\n--- 🥤 Liste des Boissons ---");
-	                for (Boisson b : boissons) {
-	                    System.out.println(b);
-	                }
-	                break;
-
-	            case 3:
-	                retour = false;
-	                break;
-	        }
-	    }
-	}
-
-	
-
-
-
-	private void gererCommandesUI() {
-		boolean retour = false;
-		while (!retour) {
-			System.out.println("\n=== GESTION DES COMMANDES ===");
-			System.out.println("1. Créer une nouvelle commande");
-			System.out.println("2. Ajouter un plat à une commande");
-			System.out.println("3. Supprimer un plat d'une commande");
-			System.out.println("4. Valider une commande");
-			System.out.println("5. Consulter une commande");
-			System.out.println("7. Retour au menu principal");
-			System.out.print("Votre choix (1-7): ");
-
-			int choix = lireChoixNumerique(1, 7);
-
-			switch (choix) {
-			case 1:
-				creerCommandeUI();
-				break;
-			case 2:
-				ajouterPlatCommandeUI();
-				break;
-			case 3:
-				supprimerPlatCommandeUI();
-				break;
-			case 4:
-				validerCommandeUI();
-				break;
-			case 5:
-				consulterCommandeUI();
-				break;
-			case 6:
-				calculerTotalCommandeUI();
-				break;
-			case 7:
-				retour = true;
-				break;
-			}
-		}
-	}
-	
-	/*private void effectuerPaiement() throws SQLException {
-    System.out.println("Entrez l’ID de la commande à payer : ");
-    int commandeId = scanner.nextInt();
-    scanner.nextLine();
-
-    double montant = calculerMontantCommande(commandeId); // méthode à implémenter
-
-    System.out.println("Méthodes de paiement disponibles :");
-    System.out.println("1. Carte");
-    System.out.println("2. Espèces");
-    System.out.print("Votre choix : ");
-    int choix = scanner.nextInt();
-
-    PaymentContext context = new PaymentContext();
-
-    switch (choix) {
-        case 1:
-            context.setStrategy(new PayementCarte());
-            break;
-        case 2:
-            context.setStrategy(new PayementEspeces());
-            break;
-        default:
-            System.out.println("Méthode inconnue.");
-            return;
+    public ClientInterface() throws SQLException {
+        this.commandeDao = new CommandeDao();
+        this.menuDao = new MenuDao();
+        this.reservationDao = new ReservationDao();
+        this.tableDao = new TableDao();
+        this.scanner = new Scanner(System.in);
+        this.dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
     }
 
+    // ===============================
+    // INTERFACE UTILISATEUR PRINCIPALE - PROCESSUS STRICT
+    // ===============================
 
-    context.executerPaiement(commandeId, montant);
-	FacturePdfGenerator.genererFacture(commandeId); // ✅ Générer le PDF
+    public void demarrerInterface() {
+        System.out.println("\n" + "=".repeat(80));
+        System.out.println("🍔 BIENVENUE DANS NOTRE FAST-FOOD - SUIVEZ LE PROCESSUS 🍔");
+        System.out.println("=".repeat(80));
+        
+        afficherEtatProcessus();
+        
+        System.out.println("\n=== ÉTAPES OBLIGATOIRES ===");
+        
+        if (!menuConsulte) {
+            System.out.println("1. 📋 Consulter le menu (OBLIGATOIRE)");
+            System.out.println("9. ❌ Quitter");
+            System.out.print("Votre choix: ");
+        } else if (!commandeCreee) {
+            System.out.println("2. 🛒 Créer votre commande (OBLIGATOIRE)");
+            System.out.println("1. 📋 Revoir le menu");
+            System.out.println("9. ❌ Quitter");
+            System.out.print("Votre choix: ");
+        } else if (!commandeValidee) {
+            System.out.println("3. ➕ Ajouter des articles à votre commande");
+            System.out.println("4. ➖ Retirer un article de votre commande");
+            System.out.println("5. 📄 Consulter votre commande");
+            System.out.println("6. ✅ Valider votre commande (OBLIGATOIRE)");
+            System.out.println("1. 📋 Revoir le menu");
+            System.out.println("9. ❌ Annuler et quitter");
+            System.out.print("Votre choix: ");
+        } else if (!commandePayee) {
+            System.out.println("7. 💳 Payer votre commande (OBLIGATOIRE)");
+            System.out.println("5. 📄 Revoir votre commande");
+            System.out.println("9. ❌ Annuler et quitter");
+            System.out.print("Votre choix: ");
+        } else if (!commandePrete) {
+            System.out.println("⏳ Votre commande est en préparation...");
+            System.out.println("5. 📄 Revoir votre commande");
+            System.out.println("10. 🔔 Vérifier si la commande est prête");
+            System.out.println("9. ❌ Quitter (commande sera perdue)");
+            System.out.print("Votre choix: ");
+        } else if (!commandeRecuperee) {
+            System.out.println("8. 🎉 Récupérer votre commande (OBLIGATOIRE)");
+            System.out.println("5. 📄 Revoir votre commande");
+            System.out.print("Votre choix: ");
+        } else {
+            System.out.println("✅ Processus terminé! Merci de votre visite!");
+            System.out.println("9. 👋 Quitter");
+            System.out.print("Votre choix: ");
+        }
+    }
+    
+    private void afficherEtatProcessus() {
+        System.out.println("\n📊 ÉTAT DE VOTRE PROCESSUS:");
+        System.out.println("1. Consulter le menu: " + (menuConsulte ? "✅ Terminé" : "❌ À faire"));
+        System.out.println("2. Créer commande: " + (commandeCreee ? "✅ Terminé" : "❌ À faire"));
+        System.out.println("3. Valider commande: " + (commandeValidee ? "✅ Terminé" : "❌ À faire"));
+        System.out.println("4. Payer commande: " + (commandePayee ? "✅ Terminé" : "❌ À faire"));
+        
+        if (commandePayee) {
+            if (commandePrete) {
+                System.out.println("5. Commande prête: 🎉 PRÊTE À RÉCUPÉRER!");
+            } else {
+                System.out.println("5. Commande en préparation: 👨‍🍳 En cours...");
+            }
+        }
+        
+        // Afficher notification si commande prête
+        if (commandePrete && !commandeRecuperee) {
+            System.out.println("\n🔔 ═══ NOTIFICATION IMPORTANTE ═══ 🔔");
+            System.out.println("🍽️  VOTRE COMMANDE EST PRÊTE!");
+            System.out.println("📍 Veuillez vous présenter au comptoir");
+            System.out.println("═".repeat(40));
+        }
+    }
+    
+    public void processChoice(int choix) throws SQLException {
+        switch (choix) {
+            case 1:
+                if (!menuConsulte || commandeCreee) {
+                    consulterMenuStrict();
+                } else {
+                    System.out.println("❌ Vous devez d'abord créer une commande!");
+                }
+                break;
+                
+            case 2:
+                if (menuConsulte && !commandeCreee) {
+                    creerCommandeStrict();
+                } else if (!menuConsulte) {
+                    System.out.println("❌ Consultez d'abord le menu!");
+                } else {
+                    System.out.println("❌ Vous avez déjà une commande en cours!");
+                }
+                break;
+                
+            case 3:
+                if (commandeCreee && !commandeValidee) {
+                    ajouterItemStrict();
+                } else {
+                    System.out.println("❌ Action non disponible à cette étape!");
+                }
+                break;
+                
+            case 4:
+                if (commandeCreee && !commandeValidee) {
+                    supprimerItemStrict();
+                } else {
+                    System.out.println("❌ Action non disponible à cette étape!");
+                }
+                break;
+                
+            case 5:
+                if (commandeCreee) {
+                    afficherCommandeStrict();
+                } else {
+                    System.out.println("❌ Aucune commande à afficher!");
+                }
+                break;
+                
+            case 6:
+                if (commandeCreee && !commandeValidee) {
+                    validerCommandeStrict();
+                } else {
+                    System.out.println("❌ Action non disponible à cette étape!");
+                }
+                break;
+                
+            case 7:
+                if (commandeValidee && !commandePayee) {
+                    payerCommandeStrict();
+                } else {
+                    System.out.println("❌ Validez d'abord votre commande!");
+                }
+                break;
+                
+            case 8:
+                if (commandePrete && !commandeRecuperee) {
+                    recupererCommande();
+                } else if (commandeRecuperee) {
+                    terminerProcessus();
+                } else {
+                    System.out.println("❌ Votre commande n'est pas encore prête!");
+                }
+                break;
+                
+            case 9:
+                quitterAvecConfirmation();
+                break;
+                
+            case 10:
+                if (commandePayee && !commandePrete) {
+                    verifierStatutCommande();
+                } else {
+                    System.out.println("❌ Action non disponible à cette étape!");
+                }
+                break;
+                
+            default:
+                printError("Option invalide pour cette étape du processus");
+        }
+    }
 
-}
-
-
-	private double calculerMontantCommande(int commandeId) throws SQLException {
-	    String sql = """
-	        SELECT 
-	            SUM(COALESCE(p.prix, 0) * ci.quantite) + 
-	            SUM(COALESCE(b.prix, 0) * ci.quantite) AS total
-	        FROM CommandeItem ci
-	        LEFT JOIN Plat p ON ci.plat_id = p.id
-	        LEFT JOIN Boisson b ON ci.boisson_id = b.id
-	        WHERE ci.commande_id = ?
-	    """;
-
-	    PreparedStatement stmt = DBConnection.getConnection().prepareStatement(sql);
-	    stmt.setInt(1, commandeId);
-	    ResultSet rs = stmt.executeQuery();
-
-	    if (rs.next()) {
-	        return rs.getDouble("total");
-	    }
-	    return 0;
-	}*/
-	
-//---------------ValiderCommanderUI----------------------
-	private void supprimerPlatCommandeUI() {
-	    try {
-	        System.out.print("ID de la commande : ");
-	        int commandeId = scanner.nextInt();
-
-	        System.out.print("ID du plat/boisson à supprimer : ");
-	        int itemId = scanner.nextInt();
-
-	        commandeDao.supprimerItemCommande(commandeId, itemId);
-	        System.out.println("Item supprimé de la commande.");
-	    } catch (SQLException e) {
-	        System.out.println("Erreur lors de la suppression : " + e.getMessage());
-	    }
-	}
-
-//------------------ValiderCommanderUI----------
-	private void validerCommandeUI() {
-	    try {
-	        System.out.print("ID de la commande à valider : ");
-	        int commandeId = scanner.nextInt();
-
-	        commandeDao.validerCommande(commandeId);
-	        System.out.println("Commande validée.");
-	    } catch (SQLException e) {
-	        System.out.println("Erreur lors de la validation : " + e.getMessage());
-	    }
-	}
-
-	
-	private void calculerTotalCommandeUI() {
-	    try {
-	        System.out.print("ID de la commande : ");
-	        int commandeId = scanner.nextInt();
-
-	        Commande commande = commandeDao.getCommandeById(commandeId);
-	        if (commande != null) {
-	            double total = 0;
-	            for (MenuItem item : commande.getItems()) {
-	                total += item.getPrice();
-	            }
-	            System.out.println("Total de la commande : " + total + " €");
-	        } else {
-	            System.out.println("Commande non trouvée.");
-	        }
-	    } catch (SQLException e) {
-	        System.out.println("Erreur lors du calcul : " + e.getMessage());
-	    }
-	}
-
-
-
-	
-//*************************Reservation*******************
-
-	
-	
-
-	private void gererReservationsUI() {
-		boolean retour = false;
-		while (!retour) {
-			System.out.println("\n=== GESTION DES RÉSERVATIONS ===");
-			System.out.println("1. Créer une réservation");
-			System.out.println("2. Modifier une réservation");
-			System.out.println("3. Annuler une réservation");
-			System.out.println("4. Consulter une réservation");
-			System.out.println("5. Retour au menu principal");
-			System.out.print("Votre choix (1-5): ");
-
-			int choix = lireChoixNumerique(1, 5);
-
-			switch (choix) {
-			case 1:
-				creerReservationUI();
-				break;
-			case 2:
-				modifierReservationUI();
-				break;
-			case 3:
-				annulerReservationUI();
-				break;
-			case 4:
-				consulterReservationUI();
-				break;
-			case 5:
-				retour = true;
-				break;
-			}
-		}
-	}
-
-
-
-	private void consulterTablesUI() {
-		System.out.print("Date et heure souhaitées (dd/MM/yyyy HH:mm): ");
-		String dateStr = scanner.nextLine();
-		Date dateHeure = null;
-
-		try {
-		    dateHeure = dateFormat.parse(dateStr);
-		} catch (ParseException e) {
-		    System.out.println("Format de date invalide.");
-		    return;
-		}
-
-		System.out.print("Nombre de personnes: ");
-		int nombrePersonnes = lireChoixNumerique(1, Integer.MAX_VALUE);
-
-		/*List<Table> tables = consulterTablesDisponibles(dateHeure, nombrePersonnes);
-
-		if (tables.isEmpty()) {
-		    System.out.println("Aucune table disponible pour ces critères.");
-		} else {
-		    System.out.println("\n=== TABLES DISPONIBLES ===");
-		    for (Table table : tables) {
-		        System.out.println("Table " + table.getNumero() + " - Capacité: " + 
-		            table.getCapacite() + " - Statut: " + (table.isEstOccupee() ? "Occupée" : "Disponible"));
-		    }
-		}*/
-
-	}
-
-	
-
-	private void effectuerPaiementUI() {
-	    System.out.print("Entrez l'ID de la commande à payer: ");
-	    int commandeId = lireChoixNumerique(1, Integer.MAX_VALUE);
-
-	    System.out.println("\n=== MODE DE PAIEMENT ===");
-	    System.out.println("1. Carte bancaire");
-	    System.out.println("2. Espèces");
-	    System.out.print("Votre choix (1-2): ");
-
-	    int choixPaiement = lireChoixNumerique(1, 2);
-
-	    switch (choixPaiement) {
-	        case 1:
-	            System.out.print("Numéro de carte (16 chiffres): ");
-	            String numeroCarte = scanner.nextLine().trim();
-
-	            // Validation simple du numéro de carte (16 chiffres)
-	            if (!numeroCarte.matches("\\d{16}")) {
-	                System.out.println("Numéro de carte invalide. Paiement annulé.");
-	                return;  // Sortie prématurée si invalide
-	            }
-
-	            strategie = new CreditCarte();
-	            break;
-
-	        case 2:
-	            strategie = new CashPayement();
-	            break;
-
-	        default:
-	            System.out.println("Mode de paiement non reconnu.");
-	            return;
-	    }
-
-	  /*  boolean success = payerCommande(commandeId, strategie);
-	    if (success) {
-	        System.out.println("Paiement effectué avec succès !");
-	    } else {
-	        System.out.println("Erreur lors du paiement.");
-	    }*/
-	}
-
-
-
-	private void afficherAide() {
-		System.out.println("\n=== AIDE ===");
-		System.out.println("Navigation:");
-		System.out.println("- Utilisez les chiffres pour naviguer dans les menus");
-		System.out.println("- Suivez les instructions à l'écran");
-		System.out.println("- Les dates doivent être au format dd/MM/yyyy HH:mm");
-		System.out.println("\nEtapes pour commander:");
-		System.out.println("1. Consultez le menu (option 1)");
-		System.out.println("2. Créez une commande (option 2 > 1)");
-		System.out.println("3. Ajoutez des plats (option 2 > 2)");
-		System.out.println("4. Validez la commande (option 2 > 4)");
-		System.out.println("5. Payez quand c'est prêt (option 5)");
-	}
+    
 
 	// ===============================
-	// MÉTHODES UTILITAIRES UI
-	// ===============================
+    // ÉTAPE 1: CONSULTATION DU MENU
+    // ===============================
+    
+    private void consulterMenuStrict() throws SQLException {
+        System.out.println("\n" + "=".repeat(50));
+        System.out.println("📋 CONSULTATION DU MENU");
+        System.out.println("=".repeat(50));
+        
+        // Afficher les plats
+        List<Plat> plats = menuDao.getAllPlats();
+        System.out.println("\n🍽️ === PLATS DISPONIBLES ===");
+        for (Plat p : plats) {
+            System.out.println(p);
+        }
+        
+        // Afficher les boissons
+        List<Boisson> boissons = menuDao.getAllBoissons();
+        System.out.println("\n🥤 === BOISSONS DISPONIBLES ===");
+        for (Boisson b : boissons) {
+            System.out.println(b);
+        }
+        
+        menuConsulte = true;
+        System.out.println("\n✅ Menu consulté! Vous pouvez maintenant créer votre commande.");
+        
+        System.out.println("\nAppuyez sur Entrée pour continuer...");
+        scanner.nextLine();
+    }
 
-	private int lireChoixNumerique(int min, int max) {
-		while (true) {
-			try {
-				int choix = Integer.parseInt(scanner.nextLine());
-				if (choix >= min && choix <= max) {
-					return choix;
-				} else {
-					System.out.print("Veuillez entrer un nombre entre " + min + " et " + max + ": ");
-				}
-			} catch (NumberFormatException e) {
-				System.out.print("Veuillez entrer un nombre valide: ");
-			}
-		}
-	}
+    // ===============================
+    // ÉTAPE 2: CRÉATION DE COMMANDE
+    // ===============================
+    
+    private void creerCommandeStrict() {
+        try {
+            // Sélection de table
+            List<TableRestaurant> tablesDisponibles = tableDao.getTablesDisponibles();
+            if (tablesDisponibles.isEmpty()) {
+                System.out.println("❌ Aucune table disponible actuellement.");
+                return;
+            }
+            
+            System.out.println("\n🪑 Tables disponibles:");
+            for (TableRestaurant table : tablesDisponibles) {
+                System.out.println(table);
+            }
+            
+            System.out.print("Choisissez le numéro de votre table: ");
+            int tableId = Integer.parseInt(scanner.nextLine());
+            
+            // Créer la commande
+            commandeActuelle = new Commande(prochainIdCommande++);
+            commandeActuelle.setTableId(tableId);
+            commandeActuelle.setDatecom(new Date());
+            commandeActuelle.setEtat(new NouvelleCommande());
+            
+            commandeDao.ajouterCommande(commandeActuelle);
+            commandeCreee = true;
+            
+            System.out.println("\n✅ Commande créée avec succès!");
+            System.out.println("📋 Commande ID: " + commandeActuelle.getCommandeId());
+            System.out.println("🪑 Table: " + tableId);
+            System.out.println("\nVous pouvez maintenant ajouter des articles à votre commande.");
+            
+        } catch (SQLException | NumberFormatException e) {
+            System.out.println("❌ Erreur lors de la création: " + e.getMessage());
+        }
+    }
 
-	private void afficherMenu(List<MenuItem> items) {
-		if (items == null || items.isEmpty()) {
-			System.out.println("Aucun élément disponible.");
-			return;
-		}
+    // ===============================
+    // ÉTAPE 3: GESTION DES ARTICLES
+    // ===============================
+    
+    private void ajouterItemStrict() {
+        try {
+            System.out.println("\n➕ AJOUTER UN ARTICLE");
+            
+            // Afficher le menu simplifié
+            List<MenuItem> menuItems = menuDao.getAllItems();
+            System.out.println("\n=== MENU RAPIDE ===");
+            for (MenuItem item : menuItems) {
+                System.out.printf("%-3d - %-25s %.2f€%n", item.getId(), item.getName(), item.getPrice());
+            }
+            
+            System.out.print("\nID de l'article à ajouter: ");
+            int itemId = Integer.parseInt(scanner.nextLine());
+            
+            System.out.print("Quantité: ");
+            int quantite = Integer.parseInt(scanner.nextLine());
+            
+            MenuItem menuItem = menuItems.stream()
+                .filter(i -> i.getId() == itemId)
+                .findFirst()
+                .orElse(null);
+            
+            if (menuItem == null) {
+                System.out.println("❌ Article non trouvé!");
+                return;
+            }
+            
+            commandeDao.ajouterItemCommande(commandeActuelle.getCommandeId(), menuItem, quantite);
+            System.out.println("✅ " + quantite + "x " + menuItem.getName() + " ajouté(s) à votre commande!");
+            
+        } catch (SQLException | NumberFormatException e) {
+            System.out.println("❌ Erreur: " + e.getMessage());
+        }
+    }
+    
+    private void supprimerItemStrict() {
+        try {
+            afficherCommandeStrict();
+            
+            System.out.print("\nID de l'article à supprimer: ");
+            int itemId = Integer.parseInt(scanner.nextLine());
+            
+            commandeDao.supprimerItemCommande(commandeActuelle.getCommandeId(), itemId);
+            System.out.println("✅ Article supprimé de votre commande!");
+            
+        } catch (SQLException | NumberFormatException e) {
+            System.out.println("❌ Erreur: " + e.getMessage());
+        }
+    }
+    
+    private void afficherCommandeStrict() {
+        try {
+            Commande commande = commandeDao.getCommandeById(commandeActuelle.getCommandeId());
+            if (commande == null) {
+                System.out.println("❌ Erreur lors de la récupération de la commande.");
+                return;
+            }
+            
+            System.out.println("\n" + "=".repeat(50));
+            System.out.println("📄 VOTRE COMMANDE ACTUELLE");
+            System.out.println("=".repeat(50));
+            System.out.println("🆔 Commande: " + commande.getCommandeId());
+            System.out.println("🪑 Table: " + commande.getTableId());
+            System.out.println("📅 Date: " + commande.getDatecom());
+            System.out.println("📊 État: " + commande.getEtat().getEtat());
+            
+            System.out.println("\n🍽️ Articles commandés:");
+            double total = 0;
+            
+            if (commande.getItems().isEmpty()) {
+                System.out.println("   (Aucun article pour le moment)");
+            } else {
+                for (CommandeItem item : commande.getItems()) {
+                    double sousTotal = item.getItem().getPrice() * item.getQuantite();
+                    System.out.printf("   - %s x%d = %.2f€%n", 
+                        item.getItem().getName(), item.getQuantite(), sousTotal);
+                    total += sousTotal;
+                }
+            }
+            
+            System.out.println("   " + "-".repeat(30));
+            System.out.printf("   💰 TOTAL: %.2f€%n", total);
+            
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur: " + e.getMessage());
+        }
+    }
 
-		System.out.println("\n=== MENU ===");
-		for (MenuItem item : items) {
-			System.out.println("ID: " + item.getId() + " | " + item.getName() + 
-					" - " + item.getPrice() + "€");
-			/*if (item.getDescription() != null && !item.getDescription().isEmpty()) {
-				System.out.println("   Description: " + item.getDescription());
-			}*/
-			System.out.println();
-		}
-	}
+    // ===============================
+    // ÉTAPE 4: VALIDATION DE COMMANDE
+    // ===============================
+    
+    private void validerCommandeStrict() {
+        try {
+            Commande commande = commandeDao.getCommandeById(commandeActuelle.getCommandeId());
+            
+            if (commande.getItems().isEmpty()) {
+                System.out.println("❌ Impossible de valider une commande vide!");
+                System.out.println("   Ajoutez au moins un article avant de valider.");
+                return;
+            }
+            
+            afficherCommandeStrict();
+            
+            System.out.println("\n⚠️  ATTENTION: Une fois validée, vous ne pourrez plus modifier votre commande!");
+            System.out.print("Confirmer la validation? (oui/non): ");
+            String confirmation = scanner.nextLine().toLowerCase();
+            
+            if (confirmation.equals("oui") || confirmation.equals("o")) {
+                commandeValidee = true;
+                System.out.println("\n✅ Commande validée avec succès!");
+                System.out.println("👉 Procédez maintenant au paiement.");
+            } else {
+                System.out.println("❌ Validation annulée. Vous pouvez encore modifier votre commande.");
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur: " + e.getMessage());
+        }
+    }
 
-	
+    // ===============================
+    // ÉTAPE 5: PAIEMENT
+    // ===============================
+    
+    private void payerCommandeStrict() {
+        try {
+            afficherCommandeStrict();
+            
+            double total = calculerTotalCommande();
+            
+            System.out.println("\n💳 === PAIEMENT ===");
+            System.out.printf("💰 Montant à payer: %.2f€%n", total);
+            
+            System.out.println("\nMéthodes de paiement disponibles:");
+            System.out.println("1. 💳 Carte bancaire");
+            System.out.println("2. 💵 Espèces");
+            System.out.print("Votre choix: ");
+            
+            int choixPaiement = Integer.parseInt(scanner.nextLine());
+            
+            PaymentContext context = new PaymentContext();
+            
+            switch (choixPaiement) {
+                case 1:
+                    context.setStrategy(new PayementCarte());
+                    System.out.println("💳 Paiement par carte en cours...");
+                    break;
+                case 2:
+                    context.setStrategy(new PayementEspeces());
+                    System.out.println("💵 Paiement en espèces...");
+                    break;
+                default:
+                    System.out.println("❌ Méthode de paiement invalide!");
+                    return;
+            }
+            
+            // Simuler le paiement
+            context.executerPaiement(commandeActuelle.getCommandeId(), total);
+            commandePayee = true;
+            
+            System.out.println("\n🎉 PAIEMENT RÉUSSI!");
+            System.out.printf("💰 Montant payé: %.2f€%n", total);
+            System.out.println("🧾 Reçu généré.");
+            System.out.println("\n👨‍🍳 Votre commande est en préparation!");
+            
+        } catch (SQLException | NumberFormatException e) {
+            System.out.println("❌ Erreur lors du paiement: " + e.getMessage());
+        }
+    }
+    
+    private double calculerTotalCommande() throws SQLException {
+        Commande commande = commandeDao.getCommandeById(commandeActuelle.getCommandeId());
+        double total = 0;
+        
+        for (CommandeItem item : commande.getItems()) {
+            total += item.getItem().getPrice() * item.getQuantite();
+        }
+        
+        return total;
+    }
 
+    // ===============================
+    // ÉTAPE 6: FINALISATION
+    // ===============================
+    
+    private void terminerProcessus() {
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("🎉 COMMANDE TERMINÉE - MERCI DE VOTRE VISITE! 🎉");
+        System.out.println("=".repeat(60));
+        
+        afficherCommandeStrict();
+        
+        System.out.println("\n📋 Récapitulatif de votre expérience:");
+        System.out.println("✅ Menu consulté");
+        System.out.println("✅ Commande créée");
+        System.out.println("✅ Commande validée");
+        System.out.println("✅ Paiement effectué");
+        System.out.println("✅ Processus terminé");
+        
+        System.out.println("\n👋 Au revoir et à bientôt dans notre fast-food!");
+        System.out.println("🌟 N'hésitez pas à nous recommander!");
+        
+        close();
+    }
+    
+    private void quitterAvecConfirmation() {
+        if (commandeCreee && !commandePayee) {
+            System.out.println("\n⚠️  ATTENTION!");
+            System.out.println("Vous avez une commande en cours qui ne sera pas sauvegardée.");
+            System.out.print("Êtes-vous sûr de vouloir quitter? (oui/non): ");
+            
+            String confirmation = scanner.nextLine().toLowerCase();
+            if (!confirmation.equals("oui") && !confirmation.equals("o")) {
+                System.out.println("👍 Parfait! Continuons votre commande.");
+                return;
+            }
+        }
+        
+        System.out.println("\n👋 Merci de votre visite!");
+        System.out.println("💡 N'hésitez pas à revenir pour suivre notre processus complet!");
+        close();
+    }
+    
+    /**
+     * Vérifie le statut de la commande en cours et gère les notifications
+     * Cette méthode est appelée quand le client veut savoir si sa commande est prête
+     */
+    private void verifierStatutCommande() {
+        try {
+            if (commandeActuelle == null) {
+                System.out.println("❌ Aucune commande en cours!");
+                return;
+            }
+            
+            System.out.println("\n🔍 === VÉRIFICATION DU STATUT DE COMMANDE ===");
+            System.out.println("🆔 Commande ID: " + commandeActuelle.getCommandeId());
+            System.out.println("⏳ Vérification en cours...");
+            
+            // Simuler une vérification avec une petite pause
+            Thread.sleep(1000);
+            
+            // Récupérer la commande mise à jour depuis la base de données
+            Commande commandeMiseAJour = commandeDao.getCommandeById(commandeActuelle.getCommandeId());
+            
+            if (commandeMiseAJour == null) {
+                System.out.println("❌ Erreur: Commande introuvable!");
+                return;
+            }
+            
+            // Vérifier l'état de la commande
+            EtatCommande etatActuel = commandeMiseAJour.getEtat();
+            String statutCommande = etatActuel.getEtat();
+            
+            System.out.println("\n📊 === STATUT ACTUEL ===");
+            System.out.println("📋 État: " + statutCommande);
+            
+            // Simuler la logique de préparation (pour la démonstration)
+            // Dans un vrai système, ceci viendrait de la base de données ou d'un service externe
+            if (!commandePrete && shouldCommandeBeReady()) {
+                commandePrete = true;
+                
+                // Démarrer le timer de notification si pas déjà fait
+                if (timerCommande == null) {
+                    demarrerTimerNotification();
+                }
+            }
+            
+            if (commandePrete) {
+                System.out.println("🎉 === BONNE NOUVELLE! ===");
+                System.out.println("✅ Votre commande est PRÊTE!");
+                System.out.println("📍 Veuillez vous présenter au comptoir");
+                System.out.println("🎯 Choisissez l'option 8 pour récupérer votre commande");
+                
+                // Afficher une notification visuelle
+                afficherNotificationCommandePrete();
+                
+            } else {
+                System.out.println("⏳ === STATUT EN COURS ===");
+                System.out.println("👨‍🍳 Votre commande est encore en préparation");
+                System.out.println("🕐 Temps estimé restant: " + calculerTempsEstime() + " minutes");
+                System.out.println("💡 Vous pouvez revérifier dans quelques minutes");
+            }
+            
+            // Afficher les détails de la commande
+            System.out.println("\n📄 === RAPPEL DE VOTRE COMMANDE ===");
+            afficherResumeMiniCommande();
+            
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur lors de la vérification: " + e.getMessage());
+        } catch (InterruptedException e) {
+            System.out.println("❌ Vérification interrompue");
+        }
+    }
 
-	private void afficherDetailsMenuItem(MenuItem item) {
-		System.out.println("\n=== DÉTAILS DU PLAT ===");
-		System.out.println("ID: " + item.getId());
-		System.out.println("Nom: " + item.getName());
-		System.out.println("Prix: " + item.getPrice() + "€");
-	}
+    /**
+     * Détermine si la commande devrait être prête (simulation)
+     * Dans un vrai système, ceci serait géré par le système de cuisine
+     */
+    private boolean shouldCommandeBeReady() {
+        // Simulation: commande prête après 3 vérifications ou de manière aléatoire
+        // Dans un vrai système, ceci dépendrait de l'état réel de la cuisine
+        return Math.random() > 0.6; // 40% de chance d'être prête à chaque vérification
+    }
 
-	private void afficherDetailsCommande(Commande commande) {
-		System.out.println("\n=== DÉTAILS DE LA COMMANDE ===");
-		System.out.println("ID: " + commande.getCommandeId());
-		System.out.println("Table: " + commande.getTableId());
-		System.out.println("Statut: " + commande.getEtat().getClass().getSimpleName());
-		System.out.println("Date création: " + commande.getDatecom());
-		System.out.println("Total: " + calculerTotal(commande.getItems()) + "€");
+    /**
+     * Calcule le temps estimé restant pour la préparation
+     */
+    private int calculerTempsEstime() {
+        if (commandeActuelle == null) return 0;
+        
+        try {
+            Commande commande = commandeDao.getCommandeById(commandeActuelle.getCommandeId());
+            int nombreItems = commande.getItems().size();
+            
+            // Estimation basée sur le nombre d'articles (2-5 minutes par article)
+            int tempsBase = nombreItems * 3;
+            int tempsAleatoire = (int)(Math.random() * 8) + 2; // 2-10 minutes
+            
+            return Math.max(1, tempsBase + tempsAleatoire);
+            
+        } catch (SQLException e) {
+            return 5; // Temps par défaut
+        }
+    }
 
-		if (!commande.getItems().isEmpty()) {
-			System.out.println("\nArticles commandés:");
-			
-			// Map<MenuItem, Integer> items attendu, mais ici c'est List<MenuItem>
-			// Donc on va afficher tous les items sans les quantités
-			for (MenuItem item : commande.getItems()) {
-				System.out.println("- " + item.getName() + " (" + item.getPrice() + "€)");
-			}
-			}
-		}
+    /**
+     * Affiche une notification visuelle que la commande est prête
+     */
+    private void afficherNotificationCommandePrete() {
+        if (!notificationAffichee) {
+            System.out.println("\n" + "🔔".repeat(20));
+            System.out.println("🎉 🍽️  VOTRE COMMANDE EST PRÊTE! 🍽️  🎉");
+            System.out.println("📍 PRÉSENTEZ-VOUS AU COMPTOIR");
+            System.out.println("🔔".repeat(20));
+            notificationAffichee = true;
+        }
+    }
 
-	private String calculerTotal(List<MenuItem> items) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * Affiche un résumé condensé de la commande
+     */
+    private void afficherResumeMiniCommande() {
+        try {
+            Commande commande = commandeDao.getCommandeById(commandeActuelle.getCommandeId());
+            if (commande == null) return;
+            
+            System.out.println("🆔 Commande: " + commande.getCommandeId());
+            System.out.println("🪑 Table: " + commande.getTableId());
+            System.out.println("📦 Nombre d'articles: " + commande.getItems().size());
+            
+            double total = 0;
+            for (CommandeItem item : commande.getItems()) {
+                total += item.getItem().getPrice() * item.getQuantite();
+            }
+            System.out.printf("💰 Total payé: %.2f€%n", total);
+            
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur lors de l'affichage du résumé");
+        }
+    }
 
-	private void afficherDetailsReservation(Reservation reservation) {
-		System.out.println("\n=== DÉTAILS DE LA RÉSERVATION ===");
-		System.out.println("ID: " + reservation.getId());
-		System.out.println("Nom: " + reservation.getNomClient());
-		System.out.println("Date et heure: " + reservation.getDateHeure());
+    /**
+     * Démarre un timer pour les notifications périodiques
+     */
+    private void demarrerTimerNotification() {
+        timerCommande = new Timer();
+        timerCommande.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (commandePrete && !commandeRecuperee) {
+                    System.out.println("\n🔔 RAPPEL: Votre commande est prête!");
+                    System.out.println("📍 N'oubliez pas de la récupérer au comptoir");
+                }
+            }
+        }, 30000, 60000); // Premier rappel après 30s, puis toutes les minutes
+    }
 
-		// Vérifie que la table n'est pas null avant d'y accéder
-		if (reservation.getTable() != null) {
-		    System.out.println("Table: " + reservation.getTable().getId());
-		    System.out.println("Statut: " + reservation.getTable().isEstOccupee());
-		    
-		}   
-		   
-		}
+    /**
+     * Méthode pour récupérer la commande (à appeler depuis processChoice case 8)
+     */
+    private void recupererCommande() {
+        if (!commandePrete) {
+            System.out.println("❌ Votre commande n'est pas encore prête!");
+            System.out.println("💡 Utilisez l'option 10 pour vérifier le statut");
+            return;
+        }
+        
+        System.out.println("\n🎉 === RÉCUPÉRATION DE COMMANDE ===");
+        System.out.println("✅ Votre commande est prête à être récupérée!");
+        
+        // Afficher les détails finaux
+        afficherResumeMiniCommande();
+        
+        System.out.println("\n📋 Vérification des articles...");
+        try {
+            Thread.sleep(1500); // Simulation de la vérification
+            
+            System.out.println("✅ Tous les articles sont présents");
+            System.out.println("🍽️ Bon appétit!");
+            
+            commandeRecuperee = true;
+            
+            // Arrêter le timer de notification
+            if (timerCommande != null) {
+                timerCommande.cancel();
+                timerCommande = null;
+            }
+            
+            System.out.println("\n🌟 Merci d'avoir choisi notre fast-food!");
+            System.out.println("💯 N'hésitez pas à nous laisser un avis!");
+            
+        } catch (InterruptedException e) {
+            System.out.println("❌ Interruption lors de la récupération");
+        }
+    }
 
+    // ===============================
+    // MÉTHODES UTILITAIRES
+    // ===============================
+    
+    private int lireChoixNumerique(int min, int max) {
+        while (true) {
+            try {
+                int choix = Integer.parseInt(scanner.nextLine());
+                if (choix >= min && choix <= max) {
+                    return choix;
+                } else {
+                    System.out.print("⚠️  Entrez un nombre entre " + min + " et " + max + ": ");
+                }
+            } catch (NumberFormatException e) {
+                System.out.print("⚠️  Entrez un nombre valide: ");
+            }
+        }
+    }
 
-
-
-		@Override
-	    public void start() throws SQLException {
-	        while (running) {
-	        	demarrerInterface();
-	            System.out.print("\nChoisissez une option: ");
-	            int choice = scanner.nextInt();
-	            scanner.nextLine();
-	            processChoice(choice);
-	        }
-	    }
-
-
-
+    @Override
+    public void start() throws SQLException {
+        System.out.println("🚀 Démarrage du système Fast-Food...");
+        
+        while (running) {
+            demarrerInterface();
+            
+            try {
+                int choice = Integer.parseInt(scanner.nextLine());
+                processChoice(choice);
+                
+                // Pause entre les actions
+                if (running) {
+                    System.out.println("\nAppuyez sur Entrée pour continuer...");
+                    scanner.nextLine();
+                }
+                
+            } catch (NumberFormatException e) {
+                System.out.println("❌ Veuillez entrer un nombre valide!");
+                System.out.println("Appuyez sur Entrée pour continuer...");
+                scanner.nextLine();
+            }
+        }
+    }
 }

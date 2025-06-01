@@ -1,20 +1,16 @@
 package dao;
 
+import model.MenuItem;
+import model.Plat;
+import model.Boisson;
+import model.MenuItemFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Boisson;
-import model.MenuItem;
-import model.Plat;
-
 public class MenuDao {
-	private Connection connection;
+    private Connection connection;
 
     public MenuDao() {
         try {
@@ -23,79 +19,90 @@ public class MenuDao {
             e.printStackTrace();
         }
     }
-
-    // ✅ Afficher tous les plats
-    public List<Plat> getAllPlats() throws SQLException  {
-        List<Plat> plats = new ArrayList<>();
-        String sql = "SELECT * FROM plat";
-        Statement stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
-
-        while (rs.next()) {
-            Plat p = new Plat(
-                rs.getInt("id"),
-                rs.getString("nom"),
-                rs.getDouble("prix")
-            );
-            plats.add(p);
+    
+    public int getNextIdForType(String type) throws SQLException {
+        String sql = "SELECT MAX(id) AS max_id FROM menu_item WHERE type = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, type);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("max_id") + 1;
+            } else {
+                return 1;
+            }
         }
+    }
 
+    public void ajouterItem(String nom, double prix, String type) throws SQLException {
+        int id = getNextIdForType(type); // ➕ Id indépendant
+        String sql = "INSERT INTO menu_item (id, nom, prix, type) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.setString(2, nom);
+            stmt.setDouble(3, prix);
+            stmt.setString(4, type.toLowerCase());
+            stmt.executeUpdate();
+        }
+    }
+
+
+    // 🔁 Obtenir tous les MenuItem (plats + boissons)
+    public List<MenuItem> getAllItems() throws SQLException {
+        List<MenuItem> items = new ArrayList<>();
+        String sql = "SELECT * FROM menu_item";
+        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                MenuItem item = MenuItemFactory.creerDepuisResultSet(rs);
+                items.add(item);
+            }
+        }
+        return items;
+    }
+
+    // ✅ Obtenir tous les plats uniquement
+    public List<Plat> getAllPlats() throws SQLException {
+        List<Plat> plats = new ArrayList<>();
+        String sql = "SELECT * FROM menu_item WHERE type = 'plat'";
+        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Plat p = new Plat(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getDouble("prix")
+                );
+                plats.add(p);
+            }
+        }
         return plats;
     }
-    
+
+    // ✅ Obtenir toutes les boissons uniquement
     public List<Boisson> getAllBoissons() throws SQLException {
         List<Boisson> boissons = new ArrayList<>();
-        String sql = "SELECT * FROM boisson";
-        Statement stmt = connection.createStatement();
-        ResultSet rs = stmt.executeQuery(sql);
-
-        while (rs.next()) {
-            Boisson b = new Boisson(
-                rs.getInt("id"),
-                rs.getString("nom"),
-                rs.getDouble("prix")
-            );
-            boissons.add(b);
+        String sql = "SELECT * FROM menu_item WHERE type = 'boisson'";
+        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Boisson b = new Boisson(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getDouble("prix")
+                );
+                boissons.add(b);
+            }
         }
-
         return boissons;
     }
-    
- // Ajouter un plat
-    public void ajouterPlat(String nom, double prix) throws SQLException {
-        String sql = "INSERT INTO Plat (nom, prix) VALUES (?, ?)";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setString(1, nom);
-        stmt.setDouble(2, prix);
-        stmt.executeUpdate();
-    }
 
-    // Supprimer un plat
-    public void supprimerPlat(int id) throws SQLException {
-        String sql = "DELETE FROM Plat WHERE id = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, id);
-        stmt.executeUpdate();
-    }
 
-    // Ajouter une boisson
-    public void ajouterBoisson(String nom, double prix) throws SQLException {
-        String sql = "INSERT INTO Boisson (nom, prix) VALUES (?, ?)";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setString(1, nom);
-        stmt.setDouble(2, prix);
-        stmt.executeUpdate();
-    }
 
-    // Supprimer une boisson
-    public void supprimerBoisson(int id) throws SQLException {
-        String sql = "DELETE FROM Boisson WHERE id = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, id);
-        stmt.executeUpdate();
+    // ❌ Supprimer un item par ID
+    public void supprimerItem(int id) throws SQLException {
+        String sql = "DELETE FROM menu_item WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        }
     }
-
-    
 
 
 }

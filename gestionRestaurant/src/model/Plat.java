@@ -17,7 +17,7 @@ public class Plat extends MenuItem {
 
 	@Override
 	public String toString() {
-		return getName() + ", " + getPrice() 
+		return getId()+". "+ getName() + ", " + getPrice() 
 				;
 	}
 	

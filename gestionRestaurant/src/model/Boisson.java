@@ -15,7 +15,7 @@ public class Boisson extends MenuItem {
 
 	@Override
 	public String toString() {
-		return  getId() + ", " + getName() + ", 1"
+		return  getId() + ". " + getName() + ", 1"
 				+ "" + getPrice()
 				;
 	}
