@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Boisson;
-import model.Ingredient;
 import model.MenuItem;
 import model.Plat;
 
@@ -25,47 +24,78 @@ public class MenuDao {
         }
     }
 
-    public void ajouter(MenuItem item) throws SQLException {
-        String query = "INSERT INTO menu_items (nom, prix, type) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-        	stmt.setInt(1, item.getId());
-            stmt.setString(2, item.getName());
-            stmt.setDouble(3, item.getPrice());
-            stmt.setString(4, item instanceof Plat ? "plat" : "boisson");
-            stmt.executeUpdate();
+    // ✅ Afficher tous les plats
+    public List<Plat> getAllPlats() throws SQLException  {
+        List<Plat> plats = new ArrayList<>();
+        String sql = "SELECT * FROM plat";
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+
+        while (rs.next()) {
+            Plat p = new Plat(
+                rs.getInt("id"),
+                rs.getString("nom"),
+                rs.getDouble("prix")
+            );
+            plats.add(p);
         }
+
+        return plats;
+    }
+    
+    public List<Boisson> getAllBoissons() throws SQLException {
+        List<Boisson> boissons = new ArrayList<>();
+        String sql = "SELECT * FROM boisson";
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+
+        while (rs.next()) {
+            Boisson b = new Boisson(
+                rs.getInt("id"),
+                rs.getString("nom"),
+                rs.getDouble("prix")
+            );
+            boissons.add(b);
+        }
+
+        return boissons;
+    }
+    
+ // Ajouter un plat
+    public void ajouterPlat(String nom, double prix) throws SQLException {
+        String sql = "INSERT INTO Plat (nom, prix) VALUES (?, ?)";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, nom);
+        stmt.setDouble(2, prix);
+        stmt.executeUpdate();
     }
 
-    public void supprimer(int id) throws SQLException {
-        String query = "DELETE FROM menu_items WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        }
+    // Supprimer un plat
+    public void supprimerPlat(int id) throws SQLException {
+        String sql = "DELETE FROM Plat WHERE id = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setInt(1, id);
+        stmt.executeUpdate();
     }
 
-    public List<MenuItem> lister() throws SQLException {
-        List<MenuItem> items = new ArrayList<>();
-        String query = "SELECT * FROM menu_items";
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            while (rs.next()) {
-                String nom = rs.getString("nom");
-                double prix = rs.getDouble("prix");
-                String type = rs.getString("type");
-                Ingredient ingredient = rs.getIngredient("ingredient");
-
-                MenuItem item;
-                if ("plat".equals(type)) {
-                    item = new Plat(nom, prix, ingredient); 
-                } else {
-                    item = new Boisson(nom, prix); // Par défaut non alcoolisé, mais peut être modifié
-                }
-
-                items.add(item);
-            }
-        }
-        return items;
+    // Ajouter une boisson
+    public void ajouterBoisson(String nom, double prix) throws SQLException {
+        String sql = "INSERT INTO Boisson (nom, prix) VALUES (?, ?)";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, nom);
+        stmt.setDouble(2, prix);
+        stmt.executeUpdate();
     }
+
+    // Supprimer une boisson
+    public void supprimerBoisson(int id) throws SQLException {
+        String sql = "DELETE FROM Boisson WHERE id = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setInt(1, id);
+        stmt.executeUpdate();
+    }
+
+    
+
+
 }

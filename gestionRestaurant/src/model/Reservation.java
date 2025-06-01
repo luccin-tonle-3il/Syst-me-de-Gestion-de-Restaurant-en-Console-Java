@@ -1,63 +1,58 @@
 package model;
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class Reservation {
-	private int id;
-	private String dateHeure;
-    private Table table;
-    private String client;
-    int i =table.getId();
-   
 
-	public Reservation(int id, String dateHeure, int i, String client) {
-		super();
-		this.id = id;
-		this.dateHeure = dateHeure;
-		this.i=i;
-		this.client = client;
-	}
+    private int id;
+    private int tableId;
+    private String nomClient;
+    private LocalDate dateReservation;     // ✔️ Meilleur que java.util.Date
+    private LocalTime heureReservation;    // ✔️ Pour gérer l'heure séparément
+    private StatutReservation statut;                 // e.g. Confirmée, Annulée, Terminée
 
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	public String getDateHeure() {
-		return dateHeure;
-	}
-
-	public void setDateHeure(String dateHeure) {
-		this.dateHeure = dateHeure;
-	}
-
-	public Table getTable() {
-		return table;
-	}
-
-	public void setTable(Table table) {
-		this.table = table;
-	}
-    
-	public void afficherDetails() {
-        System.out.println("Réservation: " + id + " - Date et Heure: " + dateHeure);
-        if (table != null) {
-            table.afficherStatut();
-        }
+    // 📦 Constructeur complet
+    public Reservation(int id, int tableId, String nomClient, LocalDate dateReservation, LocalTime heureReservation, StatutReservation statut) {
+        this.id = id;
+        this.tableId = tableId;
+        this.nomClient = nomClient;
+        this.dateReservation = dateReservation;
+        this.heureReservation = heureReservation;
+        this.statut = statut;
     }
 
-	public String getNomClient() {
-		// TODO Auto-generated method stub
-		return client;
-	}
+    // ✅ Constructeur partiel si besoin
+    public Reservation(int tableId, String nomClient, LocalDate dateReservation, LocalTime heureReservation, StatutReservation statut) {
+        this(0, tableId, nomClient, dateReservation, heureReservation, statut);
+    }
 
-	public String getDateReservation() {
-		// TODO Auto-generated method stub
-		return this.dateHeure;
-	}
-    
+    // 🔁 Getters & Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public int getTableId() { return tableId; }
+    public void setTableId(int tableId) { this.tableId = tableId; }
+
+    public String getNomClient() { return nomClient; }
+    public void setNomClient(String nomClient) { this.nomClient = nomClient; }
+
+    public LocalDate getDateReservation() { return dateReservation; }
+    public void setDateReservation(LocalDate dateReservation) { this.dateReservation = dateReservation; }
+
+    public LocalTime getHeureReservation() { return heureReservation; }
+    public void setHeureReservation(LocalTime heureReservation) { this.heureReservation = heureReservation; }
+
+    public StatutReservation getStatut() { return statut; }
+    public void setStatut(StatutReservation statut) { this.statut = statut; }
+
+    @Override
+    public String toString() {
+        return "Réservation #" + id +
+               " | Table: " + tableId +
+               " | Date: " + dateReservation +
+               " à " + heureReservation +
+               " | Client: " + nomClient +
+               " | Statut: " + statut;
+    }
 }

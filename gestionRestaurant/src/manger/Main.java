@@ -1,11 +1,14 @@
 package manger;
 
+import java.sql.SQLException;
+import java.util.Scanner;
+
 public class Main {
-	public static void main(String[] args) {
-		public static void main(String[] args) {
-	        System.out.println("=== Système de Gestion de Restaurant ===");
-	        System.out.println("1. Interface Client");
-	        System.out.println("2. Interface Administrateur");
+	public static void main(String[] args) throws SQLException {
+	
+	        System.out.println("=== ************************ BIENVENUE AU RESTAURANT LES TRIPLES ***********************===");
+	        System.out.println("1. Client");
+	        System.out.println("2. Administrateur");
 	        System.out.print("\nChoisissez votre rôle (1 ou 2): ");
 	        
 	        Scanner scanner = new Scanner(System.in);

@@ -1,105 +1,128 @@
 package model;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
-import service.CommandeState;
+import service.CommandePrete;
+import service.EtatCommande;
 import service.NouvelleCommande;
-import service.PayementStartegy;
+import service.PayementStrategy;
 
 public class Commande {
-	private List<MenuItem>items;
 	private int commandeId;
-	private int tableId;
-	private Date datecom;
-	private CommandeState etat;
-	protected PayementStartegy strategy;
-	private MenuItem menu;
-	
-	
-	
-	public Date getDatecom() {
-		return datecom;
-	}
+    private int tableId;
+    private Date datecom;
 
 
-	public void seatDatecom(Date datecom) {
-		this.datecom = datecom;
-	}
+    private List<MenuItem> items = new ArrayList<>();
 
+    // Patron State
+    private EtatCommande etat;
 
-	public int getTableId() {
-		return tableId;
-	}
-	
-	
-	public int getCommandeId() {
-		return commandeId;
-	}
+    // Patron Strategy
+    private PayementStrategy strategy;
 
+    // === Constructeur ===
+    public Commande(int commandeId) {
+        this.commandeId = commandeId;
+        this.etat = new NouvelleCommande(); // état initial
+    }
 
-	public void setCommandeId(int commandeId) {
-		this.commandeId = commandeId;
-	}
+    // === Getters / Setters ===
+    public int getCommandeId() {
+        return commandeId;
+    }
 
+    public void setCommandeId(int commandeId) {
+        this.commandeId = commandeId;
+    }
 
-	public void setTableId(int tableId) {
-		this.tableId = tableId;
-	}
+    public int getTableId() {
+        return tableId;
+    }
 
-	public void appliquerstrategy() {
-		strategy.pay();
-	}
+    public void setTableId(int tableId) {
+        this.tableId = tableId;
+    }
 
-	public List<MenuItem> getItems() {
-		return items;
-	}
+    public Date getDatecom() {
+        return datecom;
+    }
 
+    public void setDatecom(Date datecom) {
+        this.datecom = datecom;
+    }
 
-	public CommandeState getEtat() {
-		return etat;
-	}
+    public List<MenuItem> getItems() {
+        return items;
+    }
 
+    public EtatCommande getEtat() {
+        return etat;
+    }
 
-	public void setEtat(CommandeState etat) {
-		this.etat = etat;
-	}
+    public void setEtat(EtatCommande commandePrete) {
+        this.etat = commandePrete;
+    }
 
+    public void setPayementStrategy(PayementStrategy strategy) {
+        this.strategy = strategy;
+    }
 
+    // === Méthodes de gestion des items ===
+    public void ajouterItem(MenuItem item) {
+        items.add(item);
+    }
 
-	public void ajouterItem(MenuItem item) {
-		items.add(item);
-	}
+    public void afficherDetails() {
+        System.out.println("Commande #" + commandeId);
+        for (MenuItem item : items) {
+            item.afficherDetails();
+        }
+        System.out.println("État : " + etat.getEtat());
+    }
 
-		
+    // === Gestion de l'état (State) ===
+    public void suivantEtat() {
+        etat.suivant(this);
+    }
 
-	public PayementStartegy getStrategy() {
-		return strategy;
-	}
+    public void annulerCommande() {
+        etat.annuler(this);
+    }
 
-	public void setStrategy(PayementStartegy strategy) {
-		this.strategy = strategy;
-	}
+    public void operationPaye() {
+        etat.operationPaye(this);
+    }
 
-	public void afficherDetails() {
-		System.out.println("Commande :");
-		for (MenuItem item : items) {
-			item.afficherDetails();
-		}
-		System.out.println("État de la commande : " + etat.getClass().getSimpleName());
-	}
-	
-	public void operationPaye() {etat.operationPaye();}
-	public  void operationNouvelle() {etat.operationNouvelle();}
-	public  void operationEnCours() {etat.operationEnCours();}
-	public  void operationLivree() {etat.operationLivree();}
-	public  void operationPret() {etat.operationPret();}
-	
-	public void doAction() {etat.doAction();}
+    public void operationNouvelle() {
+        etat.operationNouvelle(this);
+    }
 
-	
-	
+    public void operationEnCours() {
+        etat.operationEnCours(this);
+    }
 
+    public void operationPret() {
+        etat.operationPret(this);
+    }
+
+    public void operationLivree() {
+        etat.operationLivree(this);
+    }
+
+    public void doAction() {
+        etat.doAction(this);
+    }
+
+    // === Paiement (Strategy) ===
+    public void payerCommande(double montant) throws SQLException {
+        if (strategy != null) {
+            strategy.payer(commandeId, montant);
+        } else {
+            System.out.println("Aucune stratégie de paiement définie !");
+        }
+    }
 }

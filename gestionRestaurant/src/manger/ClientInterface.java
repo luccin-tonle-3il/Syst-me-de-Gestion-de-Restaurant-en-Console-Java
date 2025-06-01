@@ -1,17 +1,30 @@
 package manger;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
 import dao.CommandeDao;
+import dao.DBConnection;
 import dao.MenuDao;
 import dao.ReservationDao;
 import dao.TableDao;
+import model.Boisson;
 import model.Commande;
 import model.MenuItem;
+import model.Plat;
+import model.Reservation;
 import observer.ClientObserver;
+import service.PayementCarte;
+import service.PayementEspeces;
+import service.PayementStrategy;
+import service.PaymentContext;
 
 
 
@@ -23,14 +36,17 @@ public class ClientInterface extends ConsoleInterface {
 	private TableDao tableDao;
 	private Scanner scanner;
 	private SimpleDateFormat dateFormat;
+	private List<Reservation> reservations ;
 
-	public ClientInterface() {
+
+	public ClientInterface() throws SQLException {
 		this.commandeDao = new CommandeDao();
 		this.menuDao = new MenuDao();
 		this.reservationDao = new ReservationDao();
 		this.tableDao = new TableDao();
 		this.scanner = new Scanner(System.in);
 		this.dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		this.reservations = new ArrayList<>();
 	}
 
 	public void setObserver(ClientObserver observer) {
@@ -44,7 +60,7 @@ public class ClientInterface extends ConsoleInterface {
 	
 
 	public void demarrerInterface() {
-		System.out.println("=== BIENVENUE AU RESTAURANT LES TRIPLES===");
+		System.out.println("===*********************** BIENVENUE PASSER UN BON MOMENT ********************************===");
 		System.out.println("\n=== MENU PRINCIPAL ===");
 		System.out.println("1. Consulter le menu");
 		System.out.println("2. Gérer mes commandes");
@@ -56,7 +72,7 @@ public class ClientInterface extends ConsoleInterface {
 		System.out.print("Votre choix (1-7): ");
 	}
 	
-	public void processChoice(int choix) {
+	public void processChoice(int choix) throws SQLException {
 			switch (choix) {
 			case 1:
 				gererConsultationMenuUI();
@@ -86,55 +102,44 @@ public class ClientInterface extends ConsoleInterface {
 		}
 	
 
-	private void gererConsultationMenuUI() {
-		boolean retour = false;
-		while (!retour) {
-			System.out.println("\n=== CONSULTATION DU MENU ===");
-			System.out.println("1. Voir tout le menu");
-			System.out.println("2. Voir les plats");
-			System.out.println("3. Voir les boissons");
-			System.out.println("4. Rechercher un plat");
-			System.out.println("5. Détails d'un plat");
-			System.out.println("6. Retour au menu principal");
-			System.out.print("Votre choix (1-6): ");
+	private void gererConsultationMenuUI() throws SQLException {
+	    boolean retour = true;
+	    while (retour) {
+	        System.out.println("\n=== CONSULTATION DU MENU ===");
+	        System.out.println("1. Voir les plats");
+	        System.out.println("2. Voir les boissons");
+	        System.out.println("3. Retour au menu principal");
+	        System.out.print("Votre choix (1-3): ");
 
-			int choix = lireChoixNumerique(1, 8);
+	        int choix = lireChoixNumerique(1, 3); // méthode perso supposée existante
 
-			switch (choix) {
-			case 1:
-				afficherMenu(consulterMenu());
-				break;
-			case 2:
-				afficherMenu(consulterMenuParCategorie("PLAT"));
-				break;
-			case 3:
-				afficherMenu(consulterMenuParCategorie("BOISSON"));
-				break;
-			case 4:
-				rechercherPlatUI();
-				break;
-			case 5:
-				retour = true;
-				break;
-		
-			
-			}
-		}
-	}
+	        switch (choix) {
+	            case 1:
+	                List<Plat> plats = menuDao.getAllPlats();
+	                System.out.println("\n--- 🍽️ Liste des Plats ---");
+	                for (Plat p : plats) {
+	                    System.out.println(p);
+	                }
+	                break;
 
-	private void rechercherPlatUI() {
-		System.out.print("Entrez le nom du plat à rechercher: ");
-		String nom = scanner.nextLine();
-		List<MenuItem> resultats = rechercherMenuItem(nom);
+	            case 2:
+	                List<Boisson> boissons = menuDao.getAllBoissons();
+	                System.out.println("\n--- 🥤 Liste des Boissons ---");
+	                for (Boisson b : boissons) {
+	                    System.out.println(b);
+	                }
+	                break;
 
-		if (resultats.isEmpty()) {
-			System.out.println("Aucun plat trouvé avec ce nom.");
-		} else {
-			afficherMenu(resultats);
-		}
+	            case 3:
+	                retour = false;
+	                break;
+	        }
+	    }
 	}
 
 	
+
+
 
 	private void gererCommandesUI() {
 		boolean retour = false;
@@ -145,7 +150,6 @@ public class ClientInterface extends ConsoleInterface {
 			System.out.println("3. Supprimer un plat d'une commande");
 			System.out.println("4. Valider une commande");
 			System.out.println("5. Consulter une commande");
-			System.out.println("6. Calculer le total d'une commande");
 			System.out.println("7. Retour au menu principal");
 			System.out.print("Votre choix (1-7): ");
 
@@ -176,89 +180,119 @@ public class ClientInterface extends ConsoleInterface {
 			}
 		}
 	}
+	
+	/*private void effectuerPaiement() throws SQLException {
+    System.out.println("Entrez l’ID de la commande à payer : ");
+    int commandeId = scanner.nextInt();
+    scanner.nextLine();
 
-	private void creerCommandeUI() {
-		System.out.print("Entrez le numéro de table: ");
-		int tableId = lireChoixNumerique(1, Integer.MAX_VALUE);
+    double montant = calculerMontantCommande(commandeId); // méthode à implémenter
 
-		int commandeId = creerCommande(tableId);
-		if (commandeId > 0) {
-			System.out.println("Commande créée avec succès ! ID: " + commandeId);
-		} else {
-			System.out.println("Erreur lors de la création de la commande.");
-		}
-	}
+    System.out.println("Méthodes de paiement disponibles :");
+    System.out.println("1. Carte");
+    System.out.println("2. Espèces");
+    System.out.print("Votre choix : ");
+    int choix = scanner.nextInt();
 
-	private int creerCommande(int tableId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    PaymentContext context = new PaymentContext();
 
-	private void ajouterPlatCommandeUI() {
-		System.out.print("Entrez l'ID de la commande: ");
-		int commandeId = lireChoixNumerique(1, Integer.MAX_VALUE);
+    switch (choix) {
+        case 1:
+            context.setStrategy(new PayementCarte());
+            break;
+        case 2:
+            context.setStrategy(new PayementEspeces());
+            break;
+        default:
+            System.out.println("Méthode inconnue.");
+            return;
+    }
 
-		System.out.print("Entrez l'ID du plat: ");
-		int platId = lireChoixNumerique(1, Integer.MAX_VALUE);
 
-		System.out.print("Entrez la quantité: ");
-		int quantite = lireChoixNumerique(1, Integer.MAX_VALUE);
+    context.executerPaiement(commandeId, montant);
+	FacturePdfGenerator.genererFacture(commandeId); // ✅ Générer le PDF
 
-		boolean success = (commandeId, platId, quantite);
-		if (success) {
-			System.out.println("Plat ajouté à la commande avec succès !");
-		} else {
-			System.out.println("Erreur lors de l'ajout du plat.");
-		}
-	}
+}
 
+
+	private double calculerMontantCommande(int commandeId) throws SQLException {
+	    String sql = """
+	        SELECT 
+	            SUM(COALESCE(p.prix, 0) * ci.quantite) + 
+	            SUM(COALESCE(b.prix, 0) * ci.quantite) AS total
+	        FROM CommandeItem ci
+	        LEFT JOIN Plat p ON ci.plat_id = p.id
+	        LEFT JOIN Boisson b ON ci.boisson_id = b.id
+	        WHERE ci.commande_id = ?
+	    """;
+
+	    PreparedStatement stmt = DBConnection.getConnection().prepareStatement(sql);
+	    stmt.setInt(1, commandeId);
+	    ResultSet rs = stmt.executeQuery();
+
+	    if (rs.next()) {
+	        return rs.getDouble("total");
+	    }
+	    return 0;
+	}*/
+	
+//---------------ValiderCommanderUI----------------------
 	private void supprimerPlatCommandeUI() {
-		System.out.print("Entrez l'ID de la commande: ");
-		int commandeId = lireChoixNumerique(1, Integer.MAX_VALUE);
+	    try {
+	        System.out.print("ID de la commande : ");
+	        int commandeId = scanner.nextInt();
 
-		System.out.print("Entrez l'ID du plat à supprimer: ");
-		int platId = lireChoixNumerique(1, Integer.MAX_VALUE);
+	        System.out.print("ID du plat/boisson à supprimer : ");
+	        int itemId = scanner.nextInt();
 
-		boolean success = supprimerItemDeCommande(commandeId, platId);
-		if (success) {
-			System.out.println("Plat supprimé de la commande avec succès !");
-		} else {
-			System.out.println("Erreur lors de la suppression du plat.");
-		}
+	        commandeDao.supprimerItemCommande(commandeId, itemId);
+	        System.out.println("Item supprimé de la commande.");
+	    } catch (SQLException e) {
+	        System.out.println("Erreur lors de la suppression : " + e.getMessage());
+	    }
 	}
 
-
+//------------------ValiderCommanderUI----------
 	private void validerCommandeUI() {
-		System.out.print("Entrez l'ID de la commande à valider: ");
-		int commandeId = lireChoixNumerique(1, Integer.MAX_VALUE);
+	    try {
+	        System.out.print("ID de la commande à valider : ");
+	        int commandeId = scanner.nextInt();
 
-		boolean success = validerCommande(commandeId);
-		if (success) {
-			System.out.println("Commande validée avec succès !");
-		} else {
-			System.out.println("Erreur lors de la validation de la commande.");
-		}
+	        commandeDao.validerCommande(commandeId);
+	        System.out.println("Commande validée.");
+	    } catch (SQLException e) {
+	        System.out.println("Erreur lors de la validation : " + e.getMessage());
+	    }
 	}
 
-	private void consulterCommandeUI() {
-		System.out.print("Entrez l'ID de la commande: ");
-		int commandeId = lireChoixNumerique(1, Integer.MAX_VALUE);
-
-		Commande commande = consulterCommande(commandeId);
-		if (commande != null) {
-			afficherDetailsCommande(commande);
-		} else {
-			System.out.println("Commande non trouvée.");
-		}
-	}
-
+	
 	private void calculerTotalCommandeUI() {
-		System.out.print("Entrez l'ID de la commande: ");
-		int commandeId = lireChoixNumerique(1, Integer.MAX_VALUE);
+	    try {
+	        System.out.print("ID de la commande : ");
+	        int commandeId = scanner.nextInt();
 
-		double total = calculerTotalCommande(commandeId);
-		System.out.println("Total de la commande: " + total + " €");
+	        Commande commande = commandeDao.getCommandeById(commandeId);
+	        if (commande != null) {
+	            double total = 0;
+	            for (MenuItem item : commande.getItems()) {
+	                total += item.getPrice();
+	            }
+	            System.out.println("Total de la commande : " + total + " €");
+	        } else {
+	            System.out.println("Commande non trouvée.");
+	        }
+	    } catch (SQLException e) {
+	        System.out.println("Erreur lors du calcul : " + e.getMessage());
+	    }
 	}
+
+
+
+	
+//*************************Reservation*******************
+
+	
+	
 
 	private void gererReservationsUI() {
 		boolean retour = false;
@@ -293,104 +327,7 @@ public class ClientInterface extends ConsoleInterface {
 		}
 	}
 
-	private void creerReservationUI() {
-		System.out.print("Entrez votre nom: ");
-		String nom = scanner.nextLine();
 
-		System.out.print("Entrez votre téléphone: ");
-		String telephone = scanner.nextLine();
-
-		System.out.print("Entrez votre email: ");
-		String email = scanner.nextLine();
-
-		System.out.print("Nombre de personnes: ");
-		int nombrePersonnes = lireChoixNumerique(1, Integer.MAX_VALUE);
-
-		System.out.print("Date et heure (dd/MM/yyyy HH:mm): ");
-		String dateStr = scanner.nextLine();
-		Date dateHeure = null;
-
-		try {
-			dateHeure = dateFormat.parse(dateStr);
-		} catch (ParseException e) {
-			System.out.println("Format de date invalide.");
-			return;
-		}
-
-		System.out.print("Commentaires (optionnel): ");
-		String commentaires = scanner.nextLine();
-
-		int reservationId = creerReservation(nom, telephone, email, nombrePersonnes, dateHeure, commentaires);
-
-		if (reservationId > 0) {
-			System.out.println("Réservation créée avec succès ! ID: " + reservationId);
-		} else {
-			System.out.println("Erreur lors de la création de la réservation.");
-		}
-	}
-
-	private void modifierReservationUI() {
-		System.out.print("Entrez l'ID de la réservation: ");
-		int reservationId = lireChoixNumerique(1, Integer.MAX_VALUE);
-
-		System.out.print("Nouveau nom: ");
-		String nom = scanner.nextLine();
-
-		System.out.print("Nouveau téléphone: ");
-		String telephone = scanner.nextLine();
-
-		System.out.print("Nouvel email: ");
-		String email = scanner.nextLine();
-
-		System.out.print("Nouveau nombre de personnes: ");
-		int nombrePersonnes = lireChoixNumerique(1, Integer.MAX_VALUE);
-
-		System.out.print("Nouvelle date et heure (dd/MM/yyyy HH:mm): ");
-		String dateStr = scanner.nextLine();
-		Date dateHeure = null;
-
-		try {
-			dateHeure = dateFormat.parse(dateStr);
-		} catch (ParseException e) {
-			System.out.println("Format de date invalide.");
-			return;
-		}
-
-		System.out.print("Nouveaux commentaires: ");
-		String commentaires = scanner.nextLine();
-
-		boolean success = modifierReservation(reservationId, nom, telephone, email, nombrePersonnes, dateHeure, commentaires);
-
-		if (success) {
-			System.out.println("Réservation modifiée avec succès !");
-		} else {
-			System.out.println("Erreur lors de la modification de la réservation.");
-		}
-	}
-
-	private void annulerReservationUI() {
-		System.out.print("Entrez l'ID de la réservation à annuler: ");
-		int reservationId = lireChoixNumerique(1, Integer.MAX_VALUE);
-
-		boolean success = annulerReservation(reservationId);
-		if (success) {
-			System.out.println("Réservation annulée avec succès !");
-		} else {
-			System.out.println("Erreur lors de l'annulation de la réservation.");
-		}
-	}
-
-	private void consulterReservationUI() {
-		System.out.print("Entrez l'ID de la réservation: ");
-		int reservationId = lireChoixNumerique(1, Integer.MAX_VALUE);
-
-		Reservation reservation = consulterReservation(reservationId);
-		if (reservation != null) {
-			afficherDetailsReservation(reservation);
-		} else {
-			System.out.println("Réservation non trouvée.");
-		}
-	}
 
 	private void consulterTablesUI() {
 		System.out.print("Date et heure souhaitées (dd/MM/yyyy HH:mm): ");
@@ -398,58 +335,74 @@ public class ClientInterface extends ConsoleInterface {
 		Date dateHeure = null;
 
 		try {
-			dateHeure = dateFormat.parse(dateStr);
+		    dateHeure = dateFormat.parse(dateStr);
 		} catch (ParseException e) {
-			System.out.println("Format de date invalide.");
-			return;
+		    System.out.println("Format de date invalide.");
+		    return;
 		}
 
 		System.out.print("Nombre de personnes: ");
 		int nombrePersonnes = lireChoixNumerique(1, Integer.MAX_VALUE);
 
-		List<Table> tables = consulterTablesDisponibles(dateHeure, nombrePersonnes);
+		/*List<Table> tables = consulterTablesDisponibles(dateHeure, nombrePersonnes);
 
 		if (tables.isEmpty()) {
-			System.out.println("Aucune table disponible pour ces critères.");
+		    System.out.println("Aucune table disponible pour ces critères.");
 		} else {
-			System.out.println("\n=== TABLES DISPONIBLES ===");
-			for (Table table : tables) {
-				System.out.println("Table " + table.getNumero() + " - Capacité: " + 
-						table.getCapacite() + " - Emplacement: " + table.getEmplacement());
-			}
-		}
+		    System.out.println("\n=== TABLES DISPONIBLES ===");
+		    for (Table table : tables) {
+		        System.out.println("Table " + table.getNumero() + " - Capacité: " + 
+		            table.getCapacite() + " - Statut: " + (table.isEstOccupee() ? "Occupée" : "Disponible"));
+		    }
+		}*/
+
 	}
+
+	
 
 	private void effectuerPaiementUI() {
-		System.out.print("Entrez l'ID de la commande à payer: ");
-		int commandeId = lireChoixNumerique(1, Integer.MAX_VALUE);
+	    System.out.print("Entrez l'ID de la commande à payer: ");
+	    int commandeId = lireChoixNumerique(1, Integer.MAX_VALUE);
 
-		System.out.println("\n=== MODE DE PAIEMENT ===");
-		System.out.println("1. Carte bancaire");
-		System.out.println("2. Espèces");
-		System.out.print("Votre choix (1-2): ");
+	    System.out.println("\n=== MODE DE PAIEMENT ===");
+	    System.out.println("1. Carte bancaire");
+	    System.out.println("2. Espèces");
+	    System.out.print("Votre choix (1-2): ");
 
-		int choixPaiement = lireChoixNumerique(1, 2);
-		PayementStrategy strategie = null;
+	    int choixPaiement = lireChoixNumerique(1, 2);
 
-		switch (choixPaiement) {
-		case 1:
-			System.out.print("Numéro de carte (16 chiffres): ");
-			String numeroCarte = scanner.nextLine();
-			strategie = new PayementCarte(numeroCarte);
-			break;
-		case 2:
-			strategie = new PayementEspeces();
-			break;
-		}
+	    switch (choixPaiement) {
+	        case 1:
+	            System.out.print("Numéro de carte (16 chiffres): ");
+	            String numeroCarte = scanner.nextLine().trim();
 
-		boolean success = payerCommande(commandeId, strategie);
-		if (success) {
-			System.out.println("Paiement effectué avec succès !");
-		} else {
-			System.out.println("Erreur lors du paiement.");
-		}
+	            // Validation simple du numéro de carte (16 chiffres)
+	            if (!numeroCarte.matches("\\d{16}")) {
+	                System.out.println("Numéro de carte invalide. Paiement annulé.");
+	                return;  // Sortie prématurée si invalide
+	            }
+
+	            strategie = new CreditCarte();
+	            break;
+
+	        case 2:
+	            strategie = new CashPayement();
+	            break;
+
+	        default:
+	            System.out.println("Mode de paiement non reconnu.");
+	            return;
+	    }
+
+	  /*  boolean success = payerCommande(commandeId, strategie);
+	    if (success) {
+	        System.out.println("Paiement effectué avec succès !");
+	    } else {
+	        System.out.println("Erreur lors du paiement.");
+	    }*/
 	}
+
+
 
 	private void afficherAide() {
 		System.out.println("\n=== AIDE ===");
@@ -485,97 +438,76 @@ public class ClientInterface extends ConsoleInterface {
 	}
 
 	private void afficherMenu(List<MenuItem> items) {
-		if (items.isEmpty()) {
+		if (items == null || items.isEmpty()) {
 			System.out.println("Aucun élément disponible.");
 			return;
 		}
 
 		System.out.println("\n=== MENU ===");
 		for (MenuItem item : items) {
-			System.out.println("ID: " + item.getId() + " | " + item.getNom() + 
-					" - " + item.getPrix() + "€");
-			if (item.getDescription() != null && !item.getDescription().isEmpty()) {
-				System.out.println("   " + item.getDescription());
-			}
+			System.out.println("ID: " + item.getId() + " | " + item.getName() + 
+					" - " + item.getPrice() + "€");
+			/*if (item.getDescription() != null && !item.getDescription().isEmpty()) {
+				System.out.println("   Description: " + item.getDescription());
+			}*/
 			System.out.println();
 		}
 	}
 
+	
+
+
 	private void afficherDetailsMenuItem(MenuItem item) {
 		System.out.println("\n=== DÉTAILS DU PLAT ===");
-		System.out.println("Nom: " + item.getNom());
-		System.out.println("Prix: " + item.getPrix() + "€");
-		System.out.println("Catégorie: " + item.getCategorie());
-		System.out.println("Description: " + (item.getDescription() != null ? item.getDescription() : "N/A"));
-		System.out.println("Disponible: " + (item.isDisponible() ? "Oui" : "Non"));
-		System.out.println("Temps de préparation: " + item.getTempsPreparationMinutes() + " min");
+		System.out.println("ID: " + item.getId());
+		System.out.println("Nom: " + item.getName());
+		System.out.println("Prix: " + item.getPrice() + "€");
 	}
 
 	private void afficherDetailsCommande(Commande commande) {
 		System.out.println("\n=== DÉTAILS DE LA COMMANDE ===");
-		System.out.println("ID: " + commande.getId());
+		System.out.println("ID: " + commande.getCommandeId());
 		System.out.println("Table: " + commande.getTableId());
-		System.out.println("Statut: " + commande.getStatut());
-		System.out.println("Date création: " + commande.getDateCreation());
-		System.out.println("Total: " + commande.getTotal() + "€");
+		System.out.println("Statut: " + commande.getEtat().getClass().getSimpleName());
+		System.out.println("Date création: " + commande.getDatecom());
+		System.out.println("Total: " + calculerTotal(commande.getItems()) + "€");
 
 		if (!commande.getItems().isEmpty()) {
 			System.out.println("\nArticles commandés:");
-			commande.getItems().forEach((item, quantite) -> {
-				System.out.println("- " + item.getNom() + " x" + quantite + 
-						" (" + (item.getPrix() * quantite) + "€)");
-			});
+			
+			// Map<MenuItem, Integer> items attendu, mais ici c'est List<MenuItem>
+			// Donc on va afficher tous les items sans les quantités
+			for (MenuItem item : commande.getItems()) {
+				System.out.println("- " + item.getName() + " (" + item.getPrice() + "€)");
+			}
+			}
 		}
+
+	private String calculerTotal(List<MenuItem> items) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private void afficherDetailsReservation(Reservation reservation) {
 		System.out.println("\n=== DÉTAILS DE LA RÉSERVATION ===");
 		System.out.println("ID: " + reservation.getId());
-		System.out.println("Nom: " + reservation.getClientNom());
-		System.out.println("Téléphone: " + reservation.getClientTelephone());
-		System.out.println("Email: " + reservation.getClientEmail());
-		System.out.println("Nombre de personnes: " + reservation.getNombrePersonnes());
-		System.out.println("Date et heure: " + dateFormat.format(reservation.getDateHeure()));
-		System.out.println("Table: " + reservation.getTableId());
-		System.out.println("Statut: " + reservation.getStatut());
-		if (reservation.getCommentaires() != null && !reservation.getCommentaires().isEmpty()) {
-			System.out.println("Commentaires: " + reservation.getCommentaires());
+		System.out.println("Nom: " + reservation.getNomClient());
+		System.out.println("Date et heure: " + reservation.getDateHeure());
+
+		// Vérifie que la table n'est pas null avant d'y accéder
+		if (reservation.getTable() != null) {
+		    System.out.println("Table: " + reservation.getTable().getId());
+		    System.out.println("Statut: " + reservation.getTable().isEstOccupee());
+		    
+		}   
+		   
 		}
-	}
 
-	// ===============================
-	// MÉTHODES MÉTIER - CORRIGÉES
-	// ===============================
 
-	/**
-	 * Consulter tous les éléments du menu disponibles
-	 */
-	public List<MenuItem> consulterMenu() {
-		List<MenuItem> menu = menuDao.getAllMenuItems();
-		return menu.stream()
-				.filter(MenuItem::isDisponible)
-				.toList();
-	}
-
-	/**
-	 * Consulter le menu par catégorie (ENTREE, PLAT, DESSERT, BOISSON)
-	 */
-	public List<MenuItem> consulterMenuParCategorie(String categorie) {
-		List<MenuItem> items = menuDao.getMenuItemsByCategorie(categorie);
-		return items.stream()
-				.filter(MenuItem::isDisponible)
-				.toList();
-	}
-
-	/**
-	 * Rechercher un élément du menu par nom
-	 */
-	public List<MenuItem> rechercherMenuItem(String nom) {
-		return menuDao.searchMenuItemsByName(nom);
 
 
 		@Override
-	    public void start() {
+	    public void start() throws SQLException {
 	        while (running) {
 	        	demarrerInterface();
 	            System.out.print("\nChoisissez une option: ");

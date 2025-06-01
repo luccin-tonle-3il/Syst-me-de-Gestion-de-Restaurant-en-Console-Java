@@ -1,11 +1,14 @@
 package model;
 
 public class Ingredient {
+	int a=1;
+	private int idIngre;
 	 private String nom;
-	    private int quantite;
+	 private int quantite;
 
 	    public Ingredient(String nom, int quantite) {
-	        this.nom = nom;
+	       this.idIngre=a++;
+	       this.nom = nom;
 	        this.quantite = quantite;
 	    }
 

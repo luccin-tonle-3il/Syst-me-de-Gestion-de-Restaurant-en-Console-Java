@@ -11,7 +11,7 @@ public class DBConnection {
 	        if (connection == null || connection.isClosed()) {
 	            try {
 	                // Remplacez les paramètres suivants par vos propres informations de connexion à la base de données
-	                String url = "jdbc:mysql://localhost:3306/gestionrestaurant";
+	                String url = "jdbc:mysql://localhost:3306/restaurant_db";
 	                String username = "root";
 	                String password = "";
 

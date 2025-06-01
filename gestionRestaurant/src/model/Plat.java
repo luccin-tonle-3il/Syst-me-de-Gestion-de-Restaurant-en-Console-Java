@@ -1,21 +1,31 @@
 package model;
 
 public class Plat extends MenuItem {
-	private Ingredient ingredients;
-
+	
 	
 
-	public Plat(String name, double price, Ingredient ingredients) {
-		super(name, price);
-		this.ingredients = ingredients;
+	public Plat(int id, String name, double price) {
+		super(id, name, price);
+		// TODO Auto-generated constructor stub
 	}
-
-
 
 	@Override
 	public void afficherDetails() {
 		// TODO Auto-generated method stub
-		 System.out.println("Plat: " + getName() + " - Prix: " + getPrice());
+		
 	}
+
+	@Override
+	public String toString() {
+		return getName() + ", " + getPrice() 
+				;
+	}
+	
+	
+
+
+
+
+	
 
 }

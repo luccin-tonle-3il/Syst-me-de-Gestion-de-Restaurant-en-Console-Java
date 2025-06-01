@@ -2,51 +2,52 @@ package service;
 
 import model.Commande;
 
-public class CommandeLivree extends CommandeState {
+public class CommandeLivree extends EtatCommande {
 
-	public CommandeLivree(Commande commade) {
-		super(commade);
-		// TODO Auto-generated constructor stub
-	}
+	 @Override
+	    public void suivant(Commande commande) {
+	        commande.setEtat(new CommandePayee());
+	        System.out.println("Commande payée.");
+	    }
 
-	@Override
-	public void operationPaye() {
-		// TODO Auto-generated method stub
-		System.out.println ("déja payé");
-	}
+	    @Override
+	    public void annuler(Commande commande) {
+	        System.out.println("Commande livrée ne peut être annulée.");
+	    }
 
-	@Override
-	public void operationNouvelle() {
-		// TODO Auto-generated method stub
-		
-	}
+	    @Override
+	    public String getEtat() {
+	        return "Livrée";
+	    }
 
-	@Override
-	public void operationEnCours() {
-		// TODO Auto-generated method stub
-		System.out.println ("impossible");
-		
-	}
+	    @Override
+	    public void operationPaye(Commande commande) {
+	        suivant(commande);
+	    }
 
-	@Override
-	public void operationLivree() {
-		// TODO Auto-generated method stub
-		System.out.println ("Commande livree");
-		
-	}
+	    @Override
+	    public void operationNouvelle(Commande commande) {
+	        System.out.println("Commande déjà livrée.");
+	    }
 
-	@Override
-	public void operationPret() {
-		// TODO Auto-generated method stub
-		System.out.println ("impossible");
-		
-	}
+	    @Override
+	    public void operationEnCours(Commande commande) {
+	        System.out.println("Commande déjà livrée.");
+	    }
 
-	@Override
-	public void doAction() {
-		// TODO Auto-generated method stub
-		System.out.println ("Commande Livree");
-		
-	}
+	    @Override
+	    public void operationLivree(Commande commande) {
+	        System.out.println("Déjà livrée.");
+	    }
+
+	    @Override
+	    public void operationPret(Commande commande) {
+	        System.out.println("Commande déjà livrée.");
+	    }
+
+	    @Override
+	    public void doAction(Commande commande) {
+	        System.out.println("Commande livrée au client.");
+	    }
 
 }
